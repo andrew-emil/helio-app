@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "helio-app",
+    "name": "helio app",
     "slug": "helio-app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -11,12 +11,10 @@
     "jsEngine": "hermes",
     "ios": {
       "supportsTablet": true,
-      "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "com.andrewemil.helioapp",
       "icon": "./assets/images/icon2.png"
     },
     "android": {
-      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/icon2.png"

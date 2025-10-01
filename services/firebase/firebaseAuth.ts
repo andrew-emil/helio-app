@@ -1,44 +1,82 @@
 import {
     createUserWithEmailAndPassword,
+    GoogleAuthProvider,
+    signInWithCredential,
     signInWithEmailAndPassword,
     updateProfile,
 } from "firebase/auth";
-import { saveUserProfile } from "../user";
 import { auth } from "./firebase";
+import { saveUserProfile } from "../user";
 
+// Register new user
 export async function register(
     email: string,
     password: string,
     username: string
 ) {
-    const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-    );
-    await updateProfile(userCredential.user, { displayName: username });
-    const user = userCredential.user;
+    try {
+        const userCredential = await createUserWithEmailAndPassword(
+            auth,
+            email,
+            password
+        );
+        const user = userCredential.user;
 
-    await Promise.all([
-        updateProfile(user, { displayName: username }),
-        saveUserProfile(user.uid, { username, email }),
-    ]);
+        // Update Firebase Auth profile
+        await updateProfile(user, { displayName: username });
 
-    return user;
+        // Save user profile in Firestore
+        await saveUserProfile(user.uid, { username, email });
+
+        return user;
+    } catch (error) {
+        console.error("Registration failed:", error);
+        throw error;
+    }
 }
 
-// Login
+// Login with email & password
 export async function login(email: string, password: string) {
-    const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-    );
-    return userCredential.user;
+    try {
+        const userCredential = await signInWithEmailAndPassword(
+            auth,
+            email,
+            password
+        );
+        return userCredential.user;
+    } catch (error) {
+        console.error("Login failed:", error);
+        throw error;
+    }
+}
+
+// Login with Google
+export async function loginWithGoogle(idToken: string) {
+    try {
+        const credential = GoogleAuthProvider.credential(idToken);
+        const userCred = await signInWithCredential(auth, credential);
+        const user = userCred.user;
+
+        // Save Firestore profile (creates if missing, updates if exists)
+        await saveUserProfile(user.uid, {
+            username: user.displayName || "Anonymous",
+            email: user.email || "",
+        });
+
+        return user;
+    } catch (error) {
+        console.error("Google login failed:", error);
+        throw error;
+    }
 }
 
 // Logout
 export async function logout() {
-    await auth.signOut();
-    return true;
+    try {
+        await auth.signOut();
+        return true;
+    } catch (error) {
+        console.error("Logout failed:", error);
+        throw error;
+    }
 }

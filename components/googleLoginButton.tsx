@@ -1,10 +1,9 @@
 import { FONTS_CONSTANTS } from "@/constants/fontsConstants";
 import { useTheme } from "@/context/themeContext";
-import { auth } from "@/services/firebase/firebase";
+import { loginWithGoogle } from "@/services/firebase/firebaseAuth";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
-import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import { useEffect } from "react";
 import { Text, TouchableOpacity } from "react-native";
 
@@ -12,26 +11,25 @@ WebBrowser.maybeCompleteAuthSession()
 
 export default function GoogleLoginButton() {
     const { colors } = useTheme()
-    //TODO: go to google console and set up OAuth consent screen and add the redirect URI
-    const [request, response, promptAsync] = Google.useAuthRequest({
-        clientId: "1000535805893-4enc061p1ggl84l48pkg6vklha1en29s.apps.googleusercontent.com",
-        iosClientId: "1000535805893-i6235dk2quem4jc4edofumgtdk4bleqk.apps.googleusercontent.com",
-        androidClientId: "1000535805893-4enc061p1ggl84l48pkg6vklha1en29s.apps.googleusercontent.com",
+    const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+        webClientId: "620244432889-pb2v6t55per2vithg52udvaqljj5a8fv.apps.googleusercontent.com",
+        androidClientId: "620244432889-3di9lfbnk2l0qjgb499jb8g7caj5idcu.apps.googleusercontent.com",
+        iosClientId: "620244432889-5qotrklh25qlqb7rgq6b6ca7dglh5reo.apps.googleusercontent.com",
+        redirectUri: "https://auth.expo.io/@andrew-emil/helio-app",
+        scopes: ["profile", "email"]
     });
 
     useEffect(() => {
         if (response?.type === "success") {
-            const { authentication } = response;
-            if (authentication?.idToken) {
-                const credential = GoogleAuthProvider.credential(authentication.idToken);
-                signInWithCredential(auth, credential)
-                    .then((userCredential) => {
-                        console.log("User signed in with Google:", userCredential.user);
-                    })
-                    .catch((error) => {
-                        console.error("Error signing in with Google:", error);
-                    });
-            }
+            const { id_token } = response.params;
+
+            loginWithGoogle(id_token)
+                .then(user => {
+                    console.log("Google signed in:", user.email);
+                })
+                .catch(err => {
+                    console.error("Google login error:", err);
+                });
         }
     }, [response]);
 

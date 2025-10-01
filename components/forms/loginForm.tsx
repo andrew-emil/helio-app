@@ -1,5 +1,6 @@
 import { FONTS_CONSTANTS } from "@/constants/fontsConstants";
 import { useTheme } from "@/context/themeContext";
+import { useUser } from "@/context/userContext";
 import { login } from "@/services/firebase/firebaseAuth";
 import { UserStorage } from "@/services/storage/userStoage";
 import { LoginFormData, loginSchema } from "@/services/zodValidation";
@@ -11,12 +12,14 @@ import { Controller, useForm } from "react-hook-form";
 import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import CustomError from "../customError";
 import CustomInputForm from "../customInputForm";
+import { getUserProfile } from "@/services/user";
 
 
 export default function LoginForm() {
     const { colors, themeMode } = useTheme();
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
+    const { setUser } = useUser()
 
     const {
         control,
@@ -29,9 +32,34 @@ export default function LoginForm() {
 
     const onSubmit = async (data: LoginFormData) => {
         try {
-            const user = await login(data.email.trim(), data.password);
-            await UserStorage.setUserData(user.email, user.displayName, false);
-            router.replace('/(drawer)/tabs/home');
+            const firebaseUser = await login(data.email.trim(), data.password);
+            const profile = await getUserProfile(firebaseUser.uid)
+
+            if(!profile){
+                throw Error("المتسخدم غير موجود")
+            }
+
+            // Fallbacks in case profile fields are missing
+            const username = profile.username || firebaseUser.displayName || "مستخدم";
+            const email = profile.email || firebaseUser.email || "";
+            const imageUrl = profile.imageUrl || firebaseUser.photoURL || "";
+            const createdAt = profile.createdAt
+
+            const loggedUser = await UserStorage.setUserData(
+                {
+                    username,
+                    email,
+                    imageUrl,
+                    uid: firebaseUser.uid,
+                    createdAt
+                },
+                false
+            );
+            if (!loggedUser) throw Error("حدث خطأ فى التسجيل")
+
+            setUser(loggedUser)
+
+            router.replace("/(drawer)/tabs/home");
         } catch (err: any) {
             console.error(err);
             Alert.alert("خطأ في التسجيل", err?.message || "حدث خطأ");

@@ -4,11 +4,13 @@ import React from "react";
 import { TouchableOpacity } from "react-native";
 
 export default function ThemeToggleButton() {
-    const { colors, themeMode, toggleTheme } = useTheme();
+    const { colors, themeMode, setTheme } = useTheme();
 
     return (
         <TouchableOpacity
-            onPress={toggleTheme}
+            onPress={async () => {
+                await setTheme(themeMode === "light" ? "dark" : "light")
+            }}
             style={{
                 marginLeft: 10,
                 padding: 6,

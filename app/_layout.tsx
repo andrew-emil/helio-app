@@ -4,6 +4,8 @@ import { Stack } from "expo-router";
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+import { CommunityProvider } from "@/context/communityContext";
+import { ToastProvider } from "@/context/toastContext";
 import "@/styles/globals.css";
 import "react-native-gesture-handler";
 import "react-native-reanimated";
@@ -29,9 +31,13 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        <UserProvider>
-          <RootLayoutInner />
-        </UserProvider>
+        <ToastProvider>
+          <UserProvider>
+            <CommunityProvider>
+              <RootLayoutInner />
+            </CommunityProvider>
+          </UserProvider>
+        </ToastProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   )

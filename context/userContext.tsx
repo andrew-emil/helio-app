@@ -1,10 +1,11 @@
-import { UserContextValue, UserData } from "@/constants/userContextConstants";
 import { UserStorage } from "@/services/storage/userStoage";
+import { UserContextValue, UserData } from "@/types/userContext.type";
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 
 const UserContext = createContext<UserContextValue>({
     isLoggedIn: false,
     user: null,
+    setUser: (user: UserData) => { },
     isGuest: true,
     setGuest: async (guest: boolean) => { },
     logout: async () => { },
@@ -32,13 +33,9 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
     const setGuest = async (guest: boolean) => {
         setIsGuest(guest);
-        if (guest) {
-            setUser(null);
-            setIsLoggedIn(false);
-            await UserStorage.setUserData(null, true);
-        } else {
-            await UserStorage.setUserData(user, false);
-        }
+        setUser(null);
+        setIsLoggedIn(false);
+        await UserStorage.setUserData(null, true);
     }
 
     useEffect(() => {
@@ -56,7 +53,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     }, [])
 
     return (
-        <UserContext.Provider value={{ isLoggedIn, user, isGuest, setGuest, logout }}>
+        <UserContext.Provider value={{ isLoggedIn, user, setUser ,isGuest, setGuest, logout }}>
             {children}
         </UserContext.Provider>
     );

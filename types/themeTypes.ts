@@ -1,6 +1,6 @@
 import { DARK_THEME, LIGHT_THEME } from "../constants/themeConstants";
 
-export type ThemeMode = typeof LIGHT_THEME | typeof DARK_THEME;
+export type ThemeMode = typeof LIGHT_THEME | typeof DARK_THEME | "system";
 
 export interface ThemeColors {
     background: string;
@@ -15,6 +15,6 @@ export interface ThemeColors {
 export interface ThemeContextValue {
     themeMode: ThemeMode;
     colors: ThemeColors;
-    toggleTheme: () => void;
+    setTheme: (mode: ThemeMode) => Promise<void>;
     isReady: boolean;
 }

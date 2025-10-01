@@ -10,10 +10,11 @@ export const UserStorage = {
         return { user: null, isGuest: true };
     },
 
-    setUserData: async (user: UserData | null, isGuest: boolean): Promise<void> => {
+    setUserData: async (user: UserData | null, isGuest: boolean) => {
         try {
             const userData = { user, isGuest };
-            await AsyncStorage.setItem(USER_KEY_STORAGE, JSON.stringify(userData));
+            await AsyncStorage.setItem(USER_KEY_STORAGE, JSON.stringify(userData))
+            return user
         } catch (error) {
             console.error("Error saving user data to storage", error);
         }

@@ -1,7 +1,9 @@
 import { FONTS_CONSTANTS } from "@/constants/fontsConstants";
 import { useTheme } from "@/context/themeContext";
+import { useUser } from "@/context/userContext";
 import { register } from "@/services/firebase/firebaseAuth";
 import { UserStorage } from "@/services/storage/userStoage";
+import { saveUserProfile } from "@/services/user";
 import { RegisterData, registerSchema } from "@/services/zodValidation";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,6 +25,8 @@ export default function RegisterForm() {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
     const { colors } = useTheme();
+    const { setUser } = useUser()
+
     const {
         control,
         handleSubmit,
@@ -34,12 +38,34 @@ export default function RegisterForm() {
 
     const onSubmit = async (data: RegisterData) => {
         try {
-            const user = await register(
+            const firebaseUser = await register(
                 data.email.trim(),
                 data.password,
                 data.username.trim()
             );
-            await UserStorage.setUserData(user.email, user.displayName, false);
+            await saveUserProfile(firebaseUser.uid, {
+                username: firebaseUser.displayName || "مستخدم",
+                email: firebaseUser.email || "",
+                imageUrl: firebaseUser.photoURL || null
+            });
+            // Fallbacks in case profile fields are missing
+            const username = firebaseUser.displayName || "مستخدم";
+            const email = firebaseUser.email || "";
+            const imageUrl = firebaseUser.photoURL || "";
+
+            const loggedUser = await UserStorage.setUserData(
+                {
+                    username,
+                    email,
+                    imageUrl,
+                    uid: firebaseUser.uid,
+                    createdAt: new Date()
+                },
+                false
+            );
+            if (!loggedUser) throw Error("حدث خطأ فى التسجيل")
+
+            setUser(loggedUser)
             router.replace('/(drawer)/tabs/home');
         } catch (err: any) {
             console.error(err);

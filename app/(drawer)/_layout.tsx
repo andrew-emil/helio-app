@@ -158,7 +158,7 @@ export default function AppLayout() {
                 options={{
                     drawerItemStyle: { display: 'none' },
                     title: undefined,
-                    headerShown: false,
+                    headerShown: true,
                 }}
             />
 
@@ -200,7 +200,7 @@ export default function AppLayout() {
                 options={{
                     drawerItemStyle: { display: 'none' },
                     title: undefined,
-                    headerShown: false,
+                    headerShown: true,
                 }}
             />
 

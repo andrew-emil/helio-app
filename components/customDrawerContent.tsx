@@ -5,14 +5,15 @@ import { useUser } from "@/context/userContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
 import { useRouter } from "expo-router";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { DrawerSeparator } from "./drawerSeparator";
+import UserAvatar from "./userAvatar";
 
 function CustomDrawerContent(props: any) {
     const { colors, themeMode } = useTheme();
-    const { isLoggedIn, logout, user } = useUser();
+    const { logout, user } = useUser();
     const router = useRouter();
-    const { state, descriptors, navigation } = props;
+    const { state, navigation } = props;
 
     return (
         <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -32,21 +33,8 @@ function CustomDrawerContent(props: any) {
                                 borderBottomColor: colors.surface,
                             }}
                         >
-                            {
-                                user.imageUrl && (
-                                    <Image
-                                        source={{ uri: user.imageUrl }}
-                                        style={{
-                                            width: 70,
-                                            height: 70,
-                                            borderRadius: 35,
-                                            marginBottom: 8,
-                                            borderWidth: 2,
-                                            borderColor: colors.surface,
-                                        }}
-                                    />
-                                )
-                            }
+                            <UserAvatar />
+
 
                             <Text
                                 style={{
@@ -101,7 +89,7 @@ function CustomDrawerContent(props: any) {
                     <View key={sectionIndex}>
                         {section.map((item, itemIndex) => {
                             const focused = state.routes[state.index].name === item.name;
-                            const { options } = descriptors[item.name];
+                            // const { options } = descriptors[item.name];
 
                             return (
                                 <DrawerItem
@@ -139,7 +127,7 @@ function CustomDrawerContent(props: any) {
                     <Text style={{ marginLeft: 8, color: colors.text, fontFamily: FONTS_CONSTANTS.medium }}>شروط الاستخدام</Text>
                 </TouchableOpacity>
 
-                {isLoggedIn && (
+                {user && (
                     <TouchableOpacity onPress={logout} style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 10, borderRadius: 8, backgroundColor: colors.accent, marginTop: 10 }}>
                         <Ionicons name="log-out-outline" size={18} color={colors.text} />
                         <Text style={{ color: colors.text, fontFamily: FONTS_CONSTANTS.medium, marginLeft: 6 }}>تسجيل الخروج</Text>
