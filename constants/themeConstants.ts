@@ -12,6 +12,8 @@ const LIGHT_COLORS: ThemeColors = {
     accent: "#D81E5B",
     text: "#000000",
     iconColor: "#4B5563",
+    muted: "#9CA3AF",
+    error: "#EF4444",
 }
 
 const DARK_COLORS: ThemeColors = {
@@ -22,6 +24,8 @@ const DARK_COLORS: ThemeColors = {
     accent: "#EF5350",
     text: "#FFFFFF",
     iconColor: "#696969",
+    muted: "#6B7280",
+    error: "#F87171",
 }
 
 export {

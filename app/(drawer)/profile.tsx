@@ -3,9 +3,12 @@ import UserAvatar from "@/components/userAvatar";
 import { FONTS_CONSTANTS } from "@/constants/fontsConstants";
 import { useTheme } from "@/context/themeContext";
 import { useUser } from "@/context/userContext";
+import { UserStorage } from "@/services/storage/userStoage";
+import { supabase } from "@/services/supabseClient";
+import { getUserProfile, saveUserProfile } from "@/services/user";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
@@ -22,44 +25,46 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-/**
- * Profile screen with edit + delete modals.
- * Added avatar change support in the Edit modal.
- *
- * IMPORTANT: Fill in the // TODO: spots (upload image, update user in backend/context).
- */
 
 export default function Profile() {
     const { themeMode, colors } = useTheme();
-    const { user } = useUser(); // refreshUser optional
-
+    const { user, setUser, setGuest } = useUser();
 
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-    // Edit form state
     const [name, setName] = useState(user?.username ?? "");
     const [email, setEmail] = useState(user?.email ?? "");
     const [saving, setSaving] = useState(false);
     const [deleting, setDeleting] = useState(false);
 
-    // Avatar change state
-    const [pickedAvatarUri, setPickedAvatarUri] = useState<string | null>(null); // local preview
+    const [pickedAvatarUri, setPickedAvatarUri] = useState<string | null>(null);
     const [isPicking, setIsPicking] = useState(false);
     const [hasGalleryPermission, setHasGalleryPermission] = useState<boolean | null>(null);
 
-    useEffect(() => {
-        // Keep form in sync with user changes
-        setName(user?.username ?? "");
-        setEmail(user?.email ?? "");
-        // if user has an image update preview if none picked locally
-        if (!pickedAvatarUri && user?.imageUrl) {
-            // keep showing server avatar via UserAvatar component; no need to set local state
-        }
-    }, [pickedAvatarUri, user]);
 
     useEffect(() => {
-        // Reset picked avatar when closing the modal
+        const loadUserData = async () => {
+            if (user?.uid) {
+                try {
+                    const userData = await getUserProfile(user.uid);
+                    if (userData) {
+
+                        setName(userData.username || '');
+                        setEmail(userData.email || '');
+
+                    }
+                } catch (error) {
+                    console.error('Error loading user data:', error);
+                }
+            }
+        };
+
+        loadUserData();
+    }, [user?.uid]);
+
+    useEffect(() => {
+
         if (!isEditModalOpen) {
             setPickedAvatarUri(null);
         }
@@ -75,38 +80,73 @@ export default function Profile() {
         }
     }, [isEditModalOpen]);
 
-    // Placeholder API functions - replace with your real calls
+
+
     const updateUserProfile = async (payload: { username?: string; email?: string; imageUrl?: string | null }) => {
-        // TODO: Replace with your actual API / user-context update function.
-        // Example:
-        // await api.users.update(user.id, payload)
-        // or call context method: await userContext.updateUser(payload)
-        await new Promise((r) => setTimeout(r, 900));
+        if (!user?.uid) {
+            throw new Error('User not authenticated');
+        }
+
+        try {
+            await saveUserProfile(user.uid, {
+                username: payload.username,
+                email: payload.email,
+                imageUrl: payload.imageUrl,
+            });
+            setUser({
+                uid: user.uid,
+                username: payload.username!,
+                email: payload.email!,
+                imageUrl: payload.imageUrl!,
+            })
+
+        } catch (error) {
+            console.error('Error updating profile in Firestore:', error);
+            throw error;
+        }
     };
 
     const deleteUserAccount = async () => {
-        // TODO: implement account deletion: call backend and sign user out
+
         await new Promise((r) => setTimeout(r, 900));
     };
 
-    // Upload helper - you must implement real upload logic here
+
     const uploadImageToServer = async (localUri: string): Promise<string> => {
-        // TODO: Implement file upload to your storage (S3, Firebase Storage, Cloudinary, etc.)
-        // You should:
-        // 1. Convert the localUri to a blob/file.
-        // 2. Upload the blob to your storage bucket.
-        // 3. Return the publicly accessible URL (or CDN URL) of the uploaded image.
-        //
-        // Example pseudocode:
-        // const blob = await fetch(localUri).then(r => r.blob());
-        // const uploadResult = await fetch(UPLOAD_URL, { method: 'PUT', body: blob, ...});
-        // return uploadResult.publicUrl;
-        //
-        // For now this is a stub that fakes an uploaded URL:
-        await new Promise((r) => setTimeout(r, 900));
-        // NOTE: replace with real URL returned by your storage service
-        return "https://example.com/path/to/uploaded/avatar.jpg";
+        try {
+            const response = await fetch(localUri);
+            const arrayBuffer = await response.arrayBuffer();
+
+            // Prepare filename and path
+            const fileExt = localUri.split(".").pop() || "jpg";
+            const fileName = `${Date.now()}.${fileExt}`;
+            const filePath = `uploads/${fileName}`;
+
+            // Upload to Supabase storage
+            const { error } = await supabase.storage
+                .from("helio bucket")
+                .upload(filePath, arrayBuffer, {
+                    cacheControl: "3600",
+                    upsert: false,
+                    contentType: `image/${fileExt}`, // jpeg or png
+                });
+
+            if (error) throw error;
+
+            // Get the public URL
+            const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+
+            if (!data?.publicUrl) {
+                throw new Error("Could not get public URL from Supabase");
+            }
+
+            return data.publicUrl;
+        } catch (err) {
+            console.error("Error uploading image:", err);
+            throw err;
+        }
     };
+
 
     const pickImage = async () => {
         if (hasGalleryPermission === false) {
@@ -123,18 +163,18 @@ export default function Profile() {
                 quality: 0.8,
             });
 
-            // modern expo returns result.assets[]
-            // older expo returned cancelled + uri, handle both
+
+
             if ("canceled" in result && result.canceled) {
-                // user cancelled
+
                 return;
             }
 
             const uri =
-                // @ts-ignore - handle both possible shapes
+
                 Array.isArray((result as any).assets) && (result as any).assets.length
                     ? (result as any).assets[0].uri
-                    : // fallback for older API
+                    :
                     (result as any).uri;
 
             if (uri) {
@@ -159,26 +199,24 @@ export default function Profile() {
             let uploadedUrl: string | null = null;
 
             if (pickedAvatarUri) {
-                // If user picked a new avatar, upload it and get URL
-                // TODO: optionally delete previous avatar from storage if needed
+
                 uploadedUrl = await uploadImageToServer(pickedAvatarUri);
             }
 
-            // Update user with updated fields
+
             await updateUserProfile({
                 username: name.trim(),
                 email: email.trim(),
-                // if uploadedUrl is null, we don't change avatar; if you want to remove avatar set null explicitly
                 ...(uploadedUrl ? { imageUrl: uploadedUrl } : {}),
             });
-
-            // TODO: Update local user context if you have a setter (e.g. userContext.setUser(...))
-            // Example: userContext.setUser({ ...user, username: name.trim(), email: email.trim(), imageUrl: uploadedUrl ?? user.imageUrl })
-
 
 
             setIsEditModalOpen(false);
             setPickedAvatarUri(null);
+
+
+            Alert.alert("تم الحفظ", "تم تحديث الملف الشخصي بنجاح");
+
         } catch (err: any) {
             console.error("Failed to save profile", err);
             Alert.alert("خطأ", err?.message ?? "فشل تحديث الملف الشخصي");
@@ -200,8 +238,11 @@ export default function Profile() {
                         setDeleting(true);
                         try {
                             await deleteUserAccount();
+                            await UserStorage.clearUserData()
+                            setUser(null)
+                            setGuest(true)
                             setIsDeleteModalOpen(false);
-                            // TODO: after deletion - navigate to auth screen and clear tokens/context
+
                         } catch (err: any) {
                             console.error("Failed to delete account", err);
                             Alert.alert("خطأ", err?.message ?? "فشل حذف الحساب");
@@ -214,7 +255,7 @@ export default function Profile() {
         );
     };
 
-    // fallback muted color (you asked to use hex)
+
     const MUTED_HEX = "#9CA3AF";
 
     return (
@@ -232,7 +273,7 @@ export default function Profile() {
                         {pickedAvatarUri ? (
                             <Image source={{ uri: pickedAvatarUri }} style={styles.previewAvatar} />
                         ) : (
-                            <UserAvatar /> // assuming UserAvatar accepts size prop; if not adjust accordingly
+                            <UserAvatar />
                         )}
 
                         <Text style={[styles.username, { color: colors.text, fontFamily: FONTS_CONSTANTS.bold }]}>
@@ -348,13 +389,13 @@ export default function Profile() {
                                         setIsEditModalOpen(false);
                                         setPickedAvatarUri(null);
                                     }}
-                                    style={[styles.modalButton, { backgroundColor: "transparent", borderColor: "#9CA3AF", borderWidth: 1 }]}
+                                    style={[styles.modalButton, { backgroundColor: colors.surface }]}
                                 >
-                                    <Text style={{ color: colors.text }}>إلغاء</Text>
+                                    <Text style={{ color: colors.text, fontFamily: FONTS_CONSTANTS.regular }}>إلغاء</Text>
                                 </TouchableOpacity>
 
-                                <TouchableOpacity onPress={handleSaveProfile} style={[styles.modalButton, { backgroundColor: "#1f2937" }]} disabled={saving}>
-                                    {saving ? <ActivityIndicator size="small" color="#fff" /> : <Text style={{ color: "#fff" }}>حفظ</Text>}
+                                <TouchableOpacity onPress={handleSaveProfile} style={[styles.modalButton, { backgroundColor: colors.primary }]} disabled={saving}>
+                                    {saving ? <ActivityIndicator size="small" color={colors.text} /> : <Text style={{ color: colors.text, fontFamily: FONTS_CONSTANTS.regular }}>حفظ التغيرات</Text>}
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -368,20 +409,20 @@ export default function Profile() {
                     <View style={[styles.confirmCard, { backgroundColor: colors.surface }]}>
                         <Text style={[styles.modalTitle, { color: colors.text }]}>تأكيد حذف الحساب</Text>
                         <Text style={{ color: MUTED_HEX, marginTop: 8 }}>
-                            حذف الحساب سيؤدي إلى إزالة جميع بياناتك. هل تود المتابعة؟
+                            هل أنت متأكد أنك تريد المتابعة؟ سيتم إرسال طلبك إلى الإدارة، وبعد الموافقة سيتم حذف حسابك وبياناتك بشكل دائم.
                         </Text>
 
                         <View style={[styles.modalButtons, { marginTop: 16 }]}>
                             <TouchableOpacity
                                 onPress={() => setIsDeleteModalOpen(false)}
-                                style={[styles.modalButton, { backgroundColor: "transparent", borderColor: "#9CA3AF", borderWidth: 1 }]}
+                                style={[styles.modalButton, { backgroundColor: colors.surface }]}
                                 disabled={deleting}
                             >
                                 <Text style={{ color: colors.text }}>إلغاء</Text>
                             </TouchableOpacity>
 
-                            <TouchableOpacity onPress={handleConfirmDelete} style={[styles.modalButton, { backgroundColor: "#991B1B" }]} disabled={deleting}>
-                                {deleting ? <ActivityIndicator size="small" color="#fff" /> : <Text style={{ color: "#fff" }}>حذف</Text>}
+                            <TouchableOpacity onPress={handleConfirmDelete} style={[styles.modalButton, { backgroundColor: colors.error }]} disabled={deleting}>
+                                {deleting ? <ActivityIndicator size="small" color={colors.text} /> : <Text style={{ color: colors.text, fontFamily: FONTS_CONSTANTS.regular }}>حذف</Text>}
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -402,7 +443,7 @@ const styles = StyleSheet.create({
     },
     content: {
         padding: 16,
-        alignItems: "stretch", // children with width: "100%" will fill
+        alignItems: "stretch",
     },
 
     avatarSection: {
@@ -413,7 +454,7 @@ const styles = StyleSheet.create({
     },
     avatarCenter: {
         width: "100%",
-        alignItems: "center", // center avatar & texts only in this area
+        alignItems: "center",
     },
     previewAvatar: {
         width: 92,
@@ -460,7 +501,7 @@ const styles = StyleSheet.create({
     },
 
     card: {
-        width: "100%", // critical: full width card
+        width: "100%",
         borderRadius: 12,
         padding: 12,
     },
@@ -491,7 +532,7 @@ const styles = StyleSheet.create({
         fontSize: 13,
     },
 
-    /* Modal styles */
+
     modalOverlay: {
         flex: 1,
         backgroundColor: "rgba(0,0,0,0.45)",
@@ -540,7 +581,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
 
-    /* small modal controls */
+
     smallButton: {
         paddingVertical: 8,
         paddingHorizontal: 12,

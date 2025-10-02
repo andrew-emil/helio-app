@@ -1,6 +1,7 @@
 import CustomDrawerContent from "@/components/customDrawerContent";
 import { FONTS_CONSTANTS } from "@/constants/fontsConstants";
 import { useTheme } from "@/context/themeContext";
+import { useUser } from "@/context/userContext";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useRouter } from "expo-router";
@@ -10,6 +11,7 @@ import { TouchableOpacity } from "react-native";
 export default function AppLayout() {
     const { colors, themeMode } = useTheme();
     const router = useRouter()
+    const { isGuest } = useUser()
 
     return (
         <Drawer
@@ -65,16 +67,18 @@ export default function AppLayout() {
                 }}
             />
 
-            <Drawer.Screen
-                name="favorites"
-                options={{
-                    drawerLabel: "المفضلة",
-                    title: "المفضلة",
-                    drawerIcon: () => (
-                        <Ionicons name="heart-outline" size={22} color="red" />
-                    ),
-                }}
-            />
+            <Drawer.Protected guard={!isGuest}>
+                <Drawer.Screen
+                    name="favorites"
+                    options={{
+                        drawerLabel: "المفضلة",
+                        title: "المفضلة",
+                        drawerIcon: () => (
+                            <Ionicons name="heart-outline" size={22} color="red" />
+                        ),
+                    }}
+                />
+            </Drawer.Protected>
 
             <Drawer.Screen
                 name="news"

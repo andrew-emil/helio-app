@@ -1,7 +1,7 @@
 export interface UserContextValue {
     isLoggedIn: boolean;
     user: UserData | null;
-    setUser: (user: UserData) => void;
+    setUser: (user: UserData | null) => void;
     isGuest: boolean;
     setGuest: (isGuest: boolean) => Promise<void>;
     logout: () => Promise<void>;

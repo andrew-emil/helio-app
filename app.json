@@ -9,12 +9,21 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "jsEngine": "hermes",
+
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.andrewemil.helioapp",
-      "icon": "./assets/images/icon2.png"
+      "icon": "./assets/images/icon2.png",
+      "infoPlist": {
+        "NSCameraUsageDescription": "We need camera access so you can take photos.",
+        "NSPhotoLibraryUsageDescription": "We need library access to let you choose photos.",
+        "NSLocationWhenInUseUsageDescription": "We need location to show nearby items.",
+        "UIBackgroundModes": ["remote-notification"]
+      }
     },
+
     "android": {
+      "permissions": ["CAMERA", "ACCESS_FINE_LOCATION", "RECORD_AUDIO",  "NOTIFICATIONS"],
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/icon2.png"
@@ -34,6 +43,13 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon2.png",
+          "color": "#ffffff"
+        }
+      ],
       [
         "expo-font",
         {
@@ -68,15 +84,6 @@
               }
             ]
           }
-        }
-      ],
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/icon2.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "transparent"
         }
       ]
     ],

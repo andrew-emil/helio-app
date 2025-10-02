@@ -10,6 +10,8 @@ export interface ThemeColors {
     accent: string;
     text: string;
     iconColor: string;
+    muted: string;
+    error: string
 }
 
 export interface ThemeContextValue {
