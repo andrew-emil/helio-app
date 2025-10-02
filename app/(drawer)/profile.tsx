@@ -40,7 +40,7 @@ export default function Profile() {
 
     const [pickedAvatarUri, setPickedAvatarUri] = useState<string | null>(null);
     const [isPicking, setIsPicking] = useState(false);
-    const [hasGalleryPermission, setHasGalleryPermission] = useState<boolean | null>(null);
+    const [, setHasGalleryPermission] = useState<boolean | null>(null);
 
 
     useEffect(() => {
@@ -70,7 +70,6 @@ export default function Profile() {
         }
     }, [isEditModalOpen]);
 
-    // Request permission when modal opens (so we don't ask on app load)
     useEffect(() => {
         if (isEditModalOpen) {
             (async () => {
@@ -114,42 +113,44 @@ export default function Profile() {
 
     const uploadImageToServer = async (localUri: string): Promise<string> => {
         try {
-            const response = await fetch(localUri);
-            const arrayBuffer = await response.arrayBuffer();
+            const fileExt = localUri.split('.').pop();
+            const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+            const filePath = `public/${fileName}`;
 
-            // Prepare filename and path
-            const fileExt = localUri.split(".").pop() || "jpg";
-            const fileName = `${Date.now()}.${fileExt}`;
-            const filePath = `uploads/${fileName}`;
+            // Create a FormData object
+            const formData = new FormData();
+            formData.append('file', {
+                uri: localUri,
+                name: fileName,
+                type: `image/${fileExt}`,
+            } as any);
 
-            // Upload to Supabase storage
+            // Upload the FormData
             const { error } = await supabase.storage
-                .from("helio bucket")
-                .upload(filePath, arrayBuffer, {
-                    cacheControl: "3600",
-                    upsert: false,
-                    contentType: `image/${fileExt}`, // jpeg or png
+                .from('helio-images')
+                .upload(filePath, formData, {
+                    contentType: `image/${fileExt}`,
                 });
 
             if (error) throw error;
 
-            // Get the public URL
-            const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+            // Get public URL
+            const { data: { publicUrl } } = supabase.storage
+                .from('helio-images')
+                .getPublicUrl(filePath);
 
-            if (!data?.publicUrl) {
-                throw new Error("Could not get public URL from Supabase");
-            }
-
-            return data.publicUrl;
+            return publicUrl;
         } catch (err) {
             console.error("Error uploading image:", err);
             throw err;
         }
     };
 
-
     const pickImage = async () => {
-        if (hasGalleryPermission === false) {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+        // Fixed: Use the current status check, not hasGalleryPermission
+        if (status !== 'granted') {
             Alert.alert("صلاحيات مفقودة", "يرجى السماح بالوصول إلى الصور من إعدادات التطبيق.");
             return;
         }
@@ -157,26 +158,17 @@ export default function Profile() {
         try {
             setIsPicking(true);
             const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                mediaTypes: ['images'],
                 allowsEditing: true,
-                aspect: [1, 1],
+                aspect: [4, 3],
                 quality: 0.8,
             });
 
-
-
             if ("canceled" in result && result.canceled) {
-
                 return;
             }
 
-            const uri =
-
-                Array.isArray((result as any).assets) && (result as any).assets.length
-                    ? (result as any).assets[0].uri
-                    :
-                    (result as any).uri;
-
+            const uri = result.assets?.[0]?.uri;
             if (uri) {
                 setPickedAvatarUri(uri);
             }
@@ -520,14 +512,10 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
-        gap: 8,
-        paddingVertical: 10,
-        paddingHorizontal: 12,
+        padding: 10,
         borderRadius: 8,
-        marginRight: 8,
     },
     buttonText: {
-        marginLeft: 8,
         fontWeight: "700",
         fontSize: 13,
     },

@@ -1,15 +1,27 @@
-import { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
 import type {
+    AdminUser,
+    Advertisement,
+    AppUser,
+    AuditLog,
+    Category,
+    DataContextType,
+    Driver,
+    EmergencyContact,
+    ExternalRoute,
+    JobPosting, ListingStatus,
+    MarketplaceItem,
     News, Notification,
-    EmergencyContact, ServiceGuide, AppUser, AdminUser,
-    Driver, WeeklyScheduleItem, Supervisor, ExternalRoute,
+    Property,
     PublicPagesContent,
-    Advertisement, DataContextType, AuditLog,
-    MarketplaceItem, JobPosting, ListingStatus,
-    Service, Category, Review, Property
+    Review,
+    Service,
+    ServiceGuide,
+    Supervisor,
+    WeeklyScheduleItem
 } from '@/types/dataContext.type';
-import { useUser } from './userContext';
+import { createContext, ReactNode, useCallback, useContext, useState } from 'react';
 import { useToast } from './toastContext';
+import { useUser } from './userContext';
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
@@ -21,16 +33,16 @@ export const useData = (): DataContextType => {
     return context;
 };
 
-// Improved ID generator with better fallback
+
 const genId = (): string => {
     if (typeof crypto !== 'undefined' && crypto.randomUUID) {
         return crypto.randomUUID();
     }
-    // Fallback: timestamp + random string
+
     return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 };
 
-// Enhanced default public pages content
+
 const DEFAULT_PUBLIC_PAGES_CONTENT: PublicPagesContent = {
     home: {
         heroTitleLine1: 'مرحباً بكم',
@@ -83,12 +95,10 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const { showToast } = useToast();
     const { user } = useUser();
 
-    // Services & Properties State
-    const [categories, setCategories] = useState<Category[]>([]);
+    const [categories] = useState<Category[]>([]);
     const [services, setServices] = useState<Service[]>([]);
     const [properties, setProperties] = useState<Property[]>([]);
 
-    // Other State
     const [news, setNews] = useState<News[]>([]);
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [advertisements, setAdvertisements] = useState<Advertisement[]>([]);
@@ -97,38 +107,16 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [users, setUsers] = useState<AppUser[]>([]);
     const [publicPagesContent, setPublicPagesContent] = useState<PublicPagesContent>(DEFAULT_PUBLIC_PAGES_CONTENT);
     const [admins, setAdmins] = useState<AdminUser[]>([]);
-    const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+    const [auditLogs] = useState<AuditLog[]>([]);
     const [marketplaceItems, setMarketplaceItems] = useState<MarketplaceItem[]>([]);
     const [jobPostings, setJobPostings] = useState<JobPosting[]>([]);
 
-    // Transportation State
     const [internalSupervisor, setInternalSupervisor] = useState<Supervisor>({ name: '', phone: '' });
     const [externalSupervisor, setExternalSupervisor] = useState<Supervisor>({ name: '', phone: '' });
     const [internalDrivers, setInternalDrivers] = useState<Driver[]>([]);
     const [weeklySchedule, setWeeklySchedule] = useState<WeeklyScheduleItem[]>([]);
     const [externalRoutes, setExternalRoutes] = useState<ExternalRoute[]>([]);
 
-    // Load initial data from localStorage on mount
-    useEffect(() => {
-        const loadInitialData = () => {
-            try {
-                // You can add localStorage loading here if needed
-                // Example: const savedServices = localStorage.getItem('services');
-                // if (savedServices) setServices(JSON.parse(savedServices));
-            } catch (error) {
-                console.error('Error loading initial data:', error);
-            }
-        };
-
-        loadInitialData();
-    }, []);
-
-    // Save data to localStorage when it changes (optional)
-    useEffect(() => {
-        // Example: localStorage.setItem('services', JSON.stringify(services));
-    }, [services]);
-
-    // --- IMPROVED GENERIC HELPERS ---
     const genericSave = useCallback(<T extends { id?: string }>(
         setItems: React.Dispatch<React.SetStateAction<T[]>>,
         newItemData: Partial<T> & { id?: string },
@@ -138,7 +126,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     ) => {
         setItems(prev => {
             if (newItemData.id) {
-                // Update existing item
+
                 const updated = prev.map(item =>
                     item.id === newItemData.id
                         ? { ...item, ...newItemData, updatedAt: new Date().toISOString() }
@@ -147,7 +135,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 showToast(successMessage || `تم تحديث ${itemName} بنجاح`);
                 return updated;
             } else {
-                // Add new item
+
                 const newItem: T = {
                     ...defaults,
                     ...newItemData,
@@ -173,7 +161,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         });
     }, [showToast]);
 
-    // --- ENHANCED SERVICES & REVIEWS HANDLERS ---
+
     const handleSaveService = useCallback((serviceData: Omit<Service, 'id' | 'rating' | 'reviews' | 'isFavorite' | 'views' | 'creationDate'> & { id?: string }) => {
         const defaults: Partial<Service> = {
             rating: 0,
@@ -218,7 +206,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                             : r
                     );
 
-                    // Recalculate average rating
+
                     const totalRating = updatedReviews.reduce((sum, review) => sum + review.rating, 0);
                     const averageRating = updatedReviews.length > 0 ? totalRating / updatedReviews.length : 0;
 
@@ -255,7 +243,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             if (s.id === serviceId) {
                 const updatedReviews = [newReview, ...s.reviews];
 
-                // Recalculate average rating
+
                 const totalRating = updatedReviews.reduce((sum, review) => sum + review.rating, 0);
                 const averageRating = updatedReviews.length > 0 ? totalRating / updatedReviews.length : 0;
 
@@ -294,7 +282,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             if (s.id === serviceId) {
                 const updatedReviews = s.reviews.filter((r: Review) => r.id !== reviewId);
 
-                // Recalculate average rating
+
                 const totalRating = updatedReviews.reduce((sum, review) => sum + review.rating, 0);
                 const averageRating = updatedReviews.length > 0 ? totalRating / updatedReviews.length : 0;
 
@@ -327,7 +315,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         showToast('تم إضافة الرد بنجاح');
     }, [showToast]);
 
-    // --- ENHANCED PROPERTIES HANDLERS ---
+
     const handleSaveProperty = useCallback((propertyData: Omit<Property, 'id' | 'views' | 'creationDate'> & { id?: string }) => {
         const defaults: Partial<Property> = {
             views: 0,
@@ -347,7 +335,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         genericDelete(setProperties, propertyId, 'العقار');
     }, [genericDelete]);
 
-    // --- USER & ADMIN HANDLERS ---
+
     const requestAccountDeletion = useCallback((userId: string) => {
         setUsers(prev => prev.map(u =>
             u.id === userId
@@ -387,7 +375,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         genericDelete(setAdmins, adminId, 'المدير');
     }, [genericDelete]);
 
-    // --- OTHER DATA HANDLERS ---
+
     const handleSaveNews = useCallback((newsItem: Omit<News, 'id' | 'date' | 'author' | 'views'> & { id?: string }) => {
         const defaults: Partial<News> = {
             author: 'Admin',
@@ -475,7 +463,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         showToast('تم تحديث محتوى الصفحة بنجاح');
     }, [showToast]);
 
-    // Marketplace Handlers
+
     const handleSaveMarketplaceItem = useCallback((item: Omit<MarketplaceItem, 'id' | 'status' | 'creationDate' | 'expirationDate' | 'userId' | 'username' | 'avatar'> & { id?: string, duration: number }) => {
         if (!user) {
             showToast('يجب تسجيل الدخول لإضافة إعلان.', 'error');
@@ -523,7 +511,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         showToast(`تم تحديث حالة الإعلان إلى "${status}" بنجاح`);
     }, [showToast]);
 
-    // Job Handlers
+
     const handleSaveJobPosting = useCallback((job: Omit<JobPosting, 'id' | 'status' | 'creationDate' | 'expirationDate' | 'userId' | 'username' | 'avatar'> & { id?: string, duration: number }) => {
         if (!user) {
             showToast('يجب تسجيل الدخول لإضافة وظيفة.', 'error');
@@ -572,7 +560,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, [showToast]);
 
     const value: DataContextType = {
-        // State
+
         categories,
         services,
         properties,
@@ -595,7 +583,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         marketplaceItems,
         jobPostings,
 
-        // Service Handlers
+
         handleSaveService,
         handleDeleteService,
         handleToggleFavorite,
@@ -605,18 +593,18 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         handleDeleteReview,
         handleReplyToReview,
 
-        // Property Handlers
+
         handleSaveProperty,
         handleDeleteProperty,
 
-        // User & Admin Handlers
+
         requestAccountDeletion,
         handleSaveUser,
         handleDeleteUser,
         handleSaveAdmin,
         handleDeleteAdmin,
 
-        // Other Data Handlers
+
         handleSaveNews,
         handleDeleteNews,
         handleSaveNotification,
@@ -635,7 +623,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         handleSaveSchedule,
         handleUpdatePublicPageContent,
 
-        // Marketplace & Job Handlers
+
         handleSaveMarketplaceItem,
         handleDeleteMarketplaceItem,
         handleUpdateMarketplaceItemStatus,

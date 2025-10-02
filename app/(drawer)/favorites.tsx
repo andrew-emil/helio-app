@@ -11,10 +11,11 @@ import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Favourites() {
-    const { isGuest } = useUser()
+    const { isGuest, isLoggedIn } = useUser()
     const { colors } = useTheme();
     const { services } = useData()
     const favoriteServices = services.filter(s => s.isFavorite);
+    console.log(isGuest, isLoggedIn)
 
     if (isGuest) {
         return <Redirect href="/(auth)/login" />
