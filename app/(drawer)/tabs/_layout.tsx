@@ -121,6 +121,7 @@ export default function TabsLayout() {
                     ),
                 }}
             />
+
             <Tabs.Screen
                 name="realState"
                 options={{
@@ -130,6 +131,7 @@ export default function TabsLayout() {
                     ),
                 }}
             />
+
         </Tabs>
     );
 }

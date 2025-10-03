@@ -1,11 +1,11 @@
-
 import { FIREBASE_DOCS } from "@/constants/firebaseConstants";
+import { db } from "@/services/firebase/firebase";
+import { NewsDocData, NotificatioDocData } from "@/types/firebaseDocs.type";
 import { UserProfileData } from "@/types/user.type";
 import { doc, DocumentData, DocumentReference, FirestoreDataConverter, WithFieldValue } from "firebase/firestore";
-import { db } from "./firebase";
 
 
-const createConverter = <T extends DocumentData>(): FirestoreDataConverter<T> => ({
+export const createConverter = <T extends DocumentData>(): FirestoreDataConverter<T> => ({
     toFirestore(data: WithFieldValue<T>) {
         return data;
     },
@@ -23,4 +23,7 @@ const getTypedDocRef = <T extends DocumentData>(collectionPath: string, uid: str
 
 export const dbRefs = {
     users: (uid: string) => getTypedDocRef<UserProfileData>(FIREBASE_DOCS.USERS, uid),
+    news: (uid: string) => getTypedDocRef<NewsDocData>(FIREBASE_DOCS.NEWS, uid),
+    notification: (uid: string) => getTypedDocRef<NotificatioDocData>(FIREBASE_DOCS.NOTIFICATIONS, uid),
+
 } as const;

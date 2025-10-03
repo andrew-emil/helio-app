@@ -17,6 +17,7 @@ export default function Login() {
         await setGuest(true);
         router.replace('/(drawer)/tabs/home');
     }
+
     return (
         <SafeAreaView
             style={{ backgroundColor: colors.background }}

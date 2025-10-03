@@ -15,9 +15,8 @@ export default function Favourites() {
     const { colors } = useTheme();
     const { services } = useData()
     const favoriteServices = services.filter(s => s.isFavorite);
-    console.log(isGuest, isLoggedIn)
 
-    if (isGuest) {
+    if (isGuest || !isLoggedIn) {
         return <Redirect href="/(auth)/login" />
     }
 
@@ -32,7 +31,7 @@ export default function Favourites() {
                 />
                 <View className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     {favoriteServices.length > 0 ? (
-                        <View className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                        <View className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                             {favoriteServices.map(service => (
                                 <ServiceCard key={service.id} service={service} />
                             ))}

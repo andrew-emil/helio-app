@@ -206,7 +206,6 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                             : r
                     );
 
-
                     const totalRating = updatedReviews.reduce((sum, review) => sum + review.rating, 0);
                     const averageRating = updatedReviews.length > 0 ? totalRating / updatedReviews.length : 0;
 

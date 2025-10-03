@@ -1,4 +1,5 @@
-import { USER_KEY_STORAGE, UserData } from '@/constants/userContextConstants';
+import { USER_KEY_STORAGE } from '@/constants/userContextConstants';
+import { UserData } from '@/types/userContext.type';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const UserStorage = {

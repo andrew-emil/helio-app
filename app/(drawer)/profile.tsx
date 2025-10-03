@@ -5,7 +5,7 @@ import { useTheme } from "@/context/themeContext";
 import { useUser } from "@/context/userContext";
 import { UserStorage } from "@/services/storage/userStoage";
 import { supabase } from "@/services/supabseClient";
-import { getUserProfile, saveUserProfile } from "@/services/user";
+import { getUserProfile, saveUserProfile } from "@/services/firebase/user";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useEffect, useState } from "react";
@@ -78,8 +78,6 @@ export default function Profile() {
             })();
         }
     }, [isEditModalOpen]);
-
-
 
     const updateUserProfile = async (payload: { username?: string; email?: string; imageUrl?: string | null }) => {
         if (!user?.uid) {

@@ -1,12 +1,12 @@
 import { FONTS_CONSTANTS } from '@/constants/fontsConstants';
 import { useTheme } from '@/context/themeContext';
 import { useBg } from '@/hooks/useBg';
-import { News } from '@/types/dataContext.type';
+import { NewsDocData } from '@/types/firebaseDocs.type';
 import { Link } from 'expo-router';
 import React from 'react';
 import { Image, Text, View } from 'react-native';
 
-const NewsCard: React.FC<{ newsItem: News }> = ({ newsItem }) => {
+const NewsCard: React.FC<{ newsItem: NewsDocData }> = ({ newsItem }) => {
     const { colors } = useTheme()
     const { bg } = useBg()
 
@@ -15,17 +15,17 @@ const NewsCard: React.FC<{ newsItem: News }> = ({ newsItem }) => {
             style={{ backgroundColor: colors.background }}>
             <View className="relative">
                 <Image
-                    src={newsItem.imageUrl}
-                    alt={newsItem.title}
-                    className="w-full h-48 object-cover transition-transform duration-300"
-
+                    source={{ uri: newsItem.imageUrl }}
+                    className="rounded-lg h-full w-48"
+                    resizeMode='contain'
                 />
+
             </View>
             <View className="p-4">
                 <Text className="text-sm mb-2"
                     style={{ color: colors.muted, fontFamily: FONTS_CONSTANTS.regular }}
                 >
-                    {new Date(newsItem.date).toLocaleDateString('ar-EG-u-nu-latn')} • {newsItem.author}
+                    {new Date(newsItem.createdAt).toLocaleDateString('ar-EG-u-nu-latn')}
                 </Text>
                 <Text className="text-lg mb-2 h-14 overflow-hidden group-hover:text-cyan-500"
                     style={{ fontFamily: FONTS_CONSTANTS.bold, color: colors.text }}

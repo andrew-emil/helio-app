@@ -2,9 +2,8 @@ import { FONTS_CONSTANTS } from "@/constants/fontsConstants";
 import { useTheme } from "@/context/themeContext";
 import { useUser } from "@/context/userContext";
 import { register } from "@/services/firebase/firebaseAuth";
-import { UserStorage } from "@/services/storage/userStoage";
-import { saveUserProfile } from "@/services/user";
 import { RegisterData, registerSchema } from "@/services/zodValidation";
+import { saveUserData } from "@/utils/saveUserData";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
@@ -43,29 +42,9 @@ export default function RegisterForm() {
                 data.password,
                 data.username.trim()
             );
-            await saveUserProfile(firebaseUser.uid, {
-                username: firebaseUser.displayName || "مستخدم",
-                email: firebaseUser.email || "",
-                imageUrl: firebaseUser.photoURL || null
-            });
-            // Fallbacks in case profile fields are missing
-            const username = firebaseUser.displayName || "مستخدم";
-            const email = firebaseUser.email || "";
-            const imageUrl = firebaseUser.photoURL || "";
 
-            const loggedUser = await UserStorage.setUserData(
-                {
-                    username,
-                    email,
-                    imageUrl,
-                    uid: firebaseUser.uid,
-                    createdAt: new Date()
-                },
-                false
-            );
-            if (!loggedUser) throw Error("حدث خطأ فى التسجيل")
+            await saveUserData(firebaseUser, setUser)
 
-            setUser(loggedUser)
             router.replace('/(drawer)/tabs/home');
         } catch (err: any) {
             console.error(err);

@@ -5,7 +5,7 @@ import { createContext, ReactNode, useContext, useEffect, useState } from "react
 const UserContext = createContext<UserContextValue>({
     isLoggedIn: false,
     user: null,
-    setUser: (user: UserData) => { },
+    setUser: async (user: UserData | null) => { },
     isGuest: true,
     setGuest: async (guest: boolean) => { },
     logout: async () => { },
@@ -17,14 +17,14 @@ interface UserProviderProps {
 
 export const UserProvider = ({ children }: UserProviderProps) => {
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-    const [user, setUser] = useState<UserData | null>(null);
+    const [user, _setUser] = useState<UserData | null>(null);
     const [isGuest, setIsGuest] = useState<boolean>(true);
 
     const logout = async () => {
         try {
             await UserStorage.clearUserData()
             setIsLoggedIn(false);
-            setUser(null)
+            _setUser(null)
             setIsGuest(true);
         } catch (error) {
             console.error("Error during logout", error);
@@ -33,16 +33,23 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
     const setGuest = async (guest: boolean) => {
         setIsGuest(guest);
-        setUser(null);
+        _setUser(null);
         setIsLoggedIn(false);
         await UserStorage.setUserData(null, true);
+    }
+
+    const setUser = async (userData: UserData | null) => {
+        await UserStorage.setUserData(userData, false)
+        _setUser(userData)
+        setIsLoggedIn(true)
+        setIsGuest(false)
     }
 
     useEffect(() => {
         const loadUserData = async () => {
             try {
                 const userData = await UserStorage.getUserData();
-                setUser(userData.user)
+                _setUser(userData.user)
                 setIsGuest(userData.isGuest);
                 setIsLoggedIn(!!userData.user && !userData.isGuest);
             } catch (error) {
@@ -53,7 +60,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     }, [])
 
     return (
-        <UserContext.Provider value={{ isLoggedIn, user, setUser ,isGuest, setGuest, logout }}>
+        <UserContext.Provider value={{ isLoggedIn, user, setUser, isGuest, setGuest, logout }}>
             {children}
         </UserContext.Provider>
     );

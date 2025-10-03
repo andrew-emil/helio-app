@@ -6,8 +6,7 @@ import {
     updateProfile,
 } from "firebase/auth";
 import { auth } from "./firebase";
-import { saveUserProfile } from "../user";
-
+import { saveUserProfile } from "./user";
 // Register new user
 export async function register(
     email: string,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View } from 'react-native-reanimated/lib/typescript/Animated';
+import { View } from 'react-native';
 
 const Spinner: React.FC = () => (
     <View className="flex justify-center items-center h-full w-full py-20">
