@@ -1,6 +1,5 @@
 export const FIREBASE_DOCS = {
     USERS: "users",
-    ADMINS: "admins",
     SERVICES: "Services",
     ADVERTISMENTS: "advertisements",
     BUSES_EXTERNAL: "buses_external",

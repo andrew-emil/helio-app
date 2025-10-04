@@ -1,5 +1,4 @@
 import CustomDrawerContent from "@/components/customDrawerContent";
-import WhatsAppFab from "@/components/WhatsAppFloatingButton";
 import { FONTS_CONSTANTS } from "@/constants/fontsConstants";
 import { useTheme } from "@/context/themeContext";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
@@ -151,7 +150,7 @@ export default function AppLayout() {
                     options={{
                         drawerLabel: "عن المدينة و الشركة",
                         title: "عن المدينة و الشركة",
-                        drawerIcon: ({ color }) => (
+                        drawerIcon: () => (
                             <FontAwesome6 name="building-columns" size={22} color="#22C55E" />
                         ),
                     }}
@@ -172,6 +171,42 @@ export default function AppLayout() {
                         drawerLabelStyle: { display: 'none' },
                         title: "اﻻخبار",
                         headerShown: true,
+                        headerRight: () => <TouchableOpacity
+                            className="flex mr-3"
+                            onPress={() => router.push('/(drawer)/news')}
+                        >
+                            <Ionicons name='arrow-back' size={24} color={colors.text} />
+                        </TouchableOpacity>
+                    }}
+                />
+
+                <Drawer.Screen
+                    name="category/[categoryName]"
+                    options={{
+                        drawerLabelStyle: { display: 'none' },
+                        title: "الخدمات",
+                        headerShown: true,
+                        headerRight: () => <TouchableOpacity
+                            className="flex mr-3"
+                            onPress={() => router.push('/(drawer)/tabs/services')}
+                        >
+                            <Ionicons name='arrow-back' size={24} color={colors.text} />
+                        </TouchableOpacity>
+                    }}
+                />
+                
+                <Drawer.Screen
+                    name="category/service/[serviceId]"
+                    options={{
+                        drawerLabelStyle: { display: 'none' },
+                        title: "الخدمات",
+                        headerShown: true,
+                        headerRight: () => <TouchableOpacity
+                            className="flex mr-3"
+                            onPress={() => router.push('/(drawer)/category/[categoryName]')}
+                        >
+                            <Ionicons name='arrow-back' size={24} color={colors.text} />
+                        </TouchableOpacity>
                     }}
                 />
 

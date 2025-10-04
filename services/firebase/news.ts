@@ -9,7 +9,7 @@ import { db } from "./firebase";
 export const getNewsById = async (id: string): Promise<NewsDocData | null> => {
     const ref = dbRefs.news(id);
     const snapshot = await getDoc(ref);
-    return snapshot.exists() ? { id, ...snapshot.data() } : null;
+    return snapshot.data() ?? null
 };
 
 // Fetch all news

@@ -1,6 +1,6 @@
 import { FIREBASE_DOCS } from "@/constants/firebaseConstants";
 import { db } from "@/services/firebase/firebase";
-import { NewsDocData, NotificatioDocData } from "@/types/firebaseDocs.type";
+import { AdvertisementsDocData, NewsDocData, NotificatioDocData, PropertyDocData, ServiceDocData } from "@/types/firebaseDocs.type";
 import { UserProfileData } from "@/types/user.type";
 import { doc, DocumentData, DocumentReference, FirestoreDataConverter, WithFieldValue } from "firebase/firestore";
 
@@ -25,5 +25,10 @@ export const dbRefs = {
     users: (uid: string) => getTypedDocRef<UserProfileData>(FIREBASE_DOCS.USERS, uid),
     news: (uid: string) => getTypedDocRef<NewsDocData>(FIREBASE_DOCS.NEWS, uid),
     notification: (uid: string) => getTypedDocRef<NotificatioDocData>(FIREBASE_DOCS.NOTIFICATIONS, uid),
-
+    service: (categoryId: string, uid: string) =>
+        doc(db, FIREBASE_DOCS.SERVICES, categoryId, "items", uid).withConverter(
+            createConverter<ServiceDocData>()
+        ),
+    advertisment: (uid: string) => getTypedDocRef<AdvertisementsDocData>(FIREBASE_DOCS.ADVERTISMENTS, uid),
+    property: (uid: string) => getTypedDocRef<PropertyDocData>(FIREBASE_DOCS.ADVERTISMENTS, uid),
 } as const;

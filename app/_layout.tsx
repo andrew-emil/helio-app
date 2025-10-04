@@ -134,7 +134,6 @@ export default function RootLayout() {
               <CommunityProvider>
                 <DataProvider>
                   <RootLayoutInner />
-
                 </DataProvider>
               </CommunityProvider>
             </UserProvider>

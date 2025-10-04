@@ -1,3 +1,5 @@
+import { AdvertisementsDocData, NewsDocData, PropertyDocData, ServiceDocData } from "./firebaseDocs.type";
+
 //  ✅ Common Types
 export type ID = string; // Firestore IDs are always strings
 export type TimestampString = string; // store dates as Firestore Timestamp.toDate().toISOString()
@@ -300,131 +302,28 @@ export interface BoardMember {
 
 
 export interface DataContextType {
-    // Services & Categories
-    categories: Category[];
-    services: Service[];
+    // data
+    services: ServiceDocData[];
+    news: NewsDocData[];
+    advertisements: AdvertisementsDocData[];
+    properties: PropertyDocData[];
 
-    // Service methods
-    handleSaveService: (
-        serviceData: Omit<
-            Service,
-            'id' | 'rating' | 'reviews' | 'isFavorite' | 'views' | 'creationDate'
-        > & { id?: string }
-    ) => void;
-    handleDeleteService: (serviceId: string) => void;
-    handleToggleFavorite: (serviceId: string) => void;
+    // saves
+    handleSaveService: (item: Partial<ServiceDocData> & { id?: string }) => void;
+    handleSaveNews: (item: Partial<NewsDocData> & { id?: string }) => void;
+    handleSaveAdvertisement: (item: Partial<Advertisement> & { id?: string }) => void;
+    handleSaveProperty: (item: Partial<Property> & { id?: string }) => void;
 
-    // Review methods
-    handleToggleHelpfulReview: (serviceId: string, reviewId: string) => void;
-    addReview: (
-        serviceId: string,
-        reviewData: Omit<
-            Review,
-            'id' | 'date' | 'adminReply' | 'username' | 'avatar' | 'userId'
-        >
-    ) => void;
-    handleUpdateReview: (serviceId: string, reviewId: string, comment: string) => void;
-    handleDeleteReview: (serviceId: string, reviewId: string) => void;
-    handleReplyToReview: (serviceId: string, reviewId: string, reply: string) => void;
+    // deletes (optional but handy)
+    handleDeleteService: (id: string) => void;
+    handleDeleteNews: (id: string) => void;
+    handleDeleteAdvertisement: (id: string) => void;
+    handleDeleteProperty: (id: string) => void;
 
-    // Properties
-    properties: Property[];
-    handleSaveProperty: (
-        property: Omit<Property, 'id' | 'views' | 'creationDate'> & { id?: string }
-    ) => void;
-    handleDeleteProperty: (propertyId: string) => void;
-
-    // Other Data
-    news: News[];
-    notifications: Notification[];
-    advertisements: Advertisement[];
-    emergencyContacts: EmergencyContact[];
-    serviceGuides: ServiceGuide[];
-    users: AppUser[];
-    admins: AdminUser[];
-    auditLogs: AuditLog[];
-
-    // Transportation
-    transportation: {
-        internalSupervisor: Supervisor;
-        externalSupervisor: Supervisor;
-        internalDrivers: Driver[];
-        weeklySchedule: WeeklyScheduleItem[];
-        externalRoutes: ExternalRoute[];
-    };
-
-    publicPagesContent: PublicPagesContent;
-    marketplaceItems: MarketplaceItem[];
-    jobPostings: JobPosting[];
-
-    // User methods
-    requestAccountDeletion: (userId: string) => void;
-    handleSaveUser: (
-        userData: Omit<AppUser, 'id' | 'joinDate'> & { id?: string }
-    ) => void;
-    handleDeleteUser: (userId: string) => void;
-
-    // Admin methods
-    handleSaveAdmin: (adminData: Omit<AdminUser, 'id'> & { id?: string }) => void;
-    handleDeleteAdmin: (adminId: string) => void;
-
-    // Other entity methods
-    handleSaveNews: (
-        newsItem: Omit<News, 'id' | 'date' | 'author' | 'views'> & { id?: string }
-    ) => void;
-    handleDeleteNews: (newsId: string) => void;
-    handleSaveNotification: (notification: Omit<Notification, 'id'> & { id?: string }) => void;
-    handleDeleteNotification: (notificationId: string) => void;
-    handleSaveAdvertisement: (ad: Omit<Advertisement, 'id'> & { id?: string }) => void;
-    handleDeleteAdvertisement: (adId: string) => void;
-    handleSaveEmergencyContact: (contact: Omit<EmergencyContact, 'id'> & { id?: string }) => void;
-    handleDeleteEmergencyContact: (contactId: string) => void;
-    handleSaveServiceGuide: (guide: Omit<ServiceGuide, 'id'> & { id?: string }) => void;
-    handleDeleteServiceGuide: (guideId: string) => void;
-
-    // Transportation methods
-    handleSaveSupervisor: (type: 'internal' | 'external', supervisor: Supervisor) => void;
-    handleSaveDriver: (driver: Omit<Driver, 'id'> & { id?: string }) => void;
-    handleDeleteDriver: (driverId: string) => void;
-    handleSaveRoute: (route: Omit<ExternalRoute, 'id'> & { id?: string }) => void;
-    handleDeleteRoute: (routeId: string) => void;
-    handleSaveSchedule: (schedule: WeeklyScheduleItem[]) => void;
-
-    // Content Management methods
-    handleUpdatePublicPageContent: <K extends keyof PublicPagesContent>(
-        page: K,
-        content: PublicPagesContent[K]
-    ) => void;
-
-    // Marketplace methods
-    handleSaveMarketplaceItem: (
-        item: Omit<
-            MarketplaceItem,
-            | 'id'
-            | 'status'
-            | 'creationDate'
-            | 'expirationDate'
-            | 'userId'
-            | 'username'
-            | 'avatar'
-        > & { id?: string; duration: number }
-    ) => void;
-    handleDeleteMarketplaceItem: (itemId: string) => void;
-    handleUpdateMarketplaceItemStatus: (itemId: string, status: ListingStatus, rejectionReason?: string) => void;
-
-    // Job methods
-    handleSaveJobPosting: (
-        job: Omit<
-            JobPosting,
-            | 'id'
-            | 'status'
-            | 'creationDate'
-            | 'expirationDate'
-            | 'userId'
-            | 'username'
-            | 'avatar'
-        > & { id?: string; duration: number }
-    ) => void;
-    handleDeleteJobPosting: (jobId: string) => void;
-    handleUpdateJobPostingStatus: (jobId: string, status: ListingStatus, rejectionReason?: string) => void;
+    saveInitialData: (payload: {
+        services?: ServiceDocData[] | undefined;
+        news?: NewsDocData[];
+        advertisements?: AdvertisementsDocData[];
+        properties?: PropertyDocData[];
+    }) => Promise<void>
 }

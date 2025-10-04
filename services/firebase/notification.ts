@@ -9,7 +9,6 @@ export const getAllNotifications = async (): Promise<NotificatioDocData[]> => {
     const ref = collection(db, FIREBASE_DOCS.NOTIFICATIONS).withConverter(createConverter<NotificatioDocData>());
     const snapshot = await getDocs(ref);
     const data = snapshot.docs.map(doc => ({
-        id: doc.id,
         ...doc.data(),
     }));
     return data

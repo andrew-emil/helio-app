@@ -1,14 +1,16 @@
 import GradientText from "@/components/gradiantText";
 import { FONTS_CONSTANTS } from "@/constants/fontsConstants";
+import { useData } from "@/context/dataContext";
 import { useTheme } from "@/context/themeContext";
 import { useUser } from "@/context/userContext";
 import useFontsLoader from "@/hooks/useFontLoader";
+import { useSplashData } from "@/hooks/useSplashData";
 import { useRouter } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useRef } from "react";
-import { Animated, Easing, Image, StyleSheet, Text, View } from "react-native";
+import { useEffect, useRef, useState } from "react"; // Added useState
+import { Animated, Easing, Image, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-// Keep the native splash screen visible while we prepare the custom one and load fonts.
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
@@ -16,180 +18,243 @@ export default function App() {
   const { isGuest, isLoggedIn } = useUser();
   const appReady = useFontsLoader();
   const { colors } = useTheme();
+  const { data, isSuccess } = useSplashData();
 
-  // Enhanced Animation values
-  const logoPosition = useRef(new Animated.Value(300)).current; // Start from bottom
+  // Existing animations
+  const logoPosition = useRef(new Animated.Value(300)).current;
   const logoRotation = useRef(new Animated.Value(0)).current;
   const logoScale = useRef(new Animated.Value(0.5)).current;
   const textOpacity = useRef(new Animated.Value(0)).current;
   const textOffset = useRef(new Animated.Value(30)).current;
 
+  // New pulsing and progress animations
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const progressWidth = useRef(new Animated.Value(0)).current;
+  const progressOpacity = useRef(new Animated.Value(0)).current;
+
+  // Track data saving state
+  const [dataSaved, setDataSaved] = useState(false);
+  const savedRef = useRef(false);
+
+  // Start pulsing animation
+  const startPulsing = () => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.1,
+          duration: 800,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 800,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  };
+
+  // Animate progress indicator
+  const animateProgress = () => {
+    Animated.parallel([
+      Animated.timing(progressOpacity, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      Animated.timing(progressWidth, {
+        toValue: 100,
+        duration: 2500,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: false,
+      }),
+    ]).start();
+  };
+
+  // inside your splash component (top-level imports unchanged)
+  const { saveInitialData } = useData(); // <- use the new method
+
   useEffect(() => {
-    async function prepareAndHide() {
-      if (appReady) {
-        // Enhanced animation sequence with spin and movement
-        Animated.sequence([
-          // Logo animation: spin + move from bottom to center + scale
-          Animated.parallel([
-            // Move from bottom to center
-            Animated.timing(logoPosition, {
-              toValue: 0,
-              duration: 1200,
-              easing: Easing.out(Easing.cubic),
-              useNativeDriver: true,
-            }),
-            // Spin animation
-            Animated.timing(logoRotation, {
-              toValue: 1,
-              duration: 1200,
-              easing: Easing.out(Easing.cubic),
-              useNativeDriver: true,
-            }),
-            // Scale animation
-            Animated.spring(logoScale, {
-              toValue: 1,
-              tension: 60,
-              friction: 7,
-              useNativeDriver: true,
-            }),
-          ]),
+    if (isSuccess && data && !savedRef.current) {
+      savedRef.current = true;
 
-          // Brief pause when logo reaches center
-          Animated.delay(300),
+      (async () => {
+        try {
+          // Pass the whole payload and wait until state updates are scheduled
+          await saveInitialData({
+            services: data.services ?? [],
+            news: data.news ?? [],
+            advertisements: data.advertisements ?? [],
+            properties: data.properties ?? [],
+          });
 
-          // Text animation
-          Animated.parallel([
-            Animated.timing(textOpacity, {
-              toValue: 1,
-              duration: 800,
-              easing: Easing.out(Easing.cubic),
-              useNativeDriver: true,
-            }),
-            Animated.timing(textOffset, {
-              toValue: 0,
-              duration: 800,
-              easing: Easing.out(Easing.cubic),
-              useNativeDriver: true,
-            }),
-          ]),
-
-          // Keep everything visible for a moment
-          Animated.delay(800),
-        ]).start(async () => {
-          // After animations finish, hide the native splash screen and navigate
-          await SplashScreen.hideAsync();
-          if (isGuest || isLoggedIn) {
-            router.replace('/(drawer)/tabs/home');
-          } else {
-            router.replace("/(auth)/login");
-          }
-        });
-      }
+          // Now it's safe to mark dataSaved and continue
+          setDataSaved(true);
+        } catch (err) {
+          console.warn("saveInitialData failed:", err);
+          // still continue so the splash doesn't block forever
+          setDataSaved(true);
+        }
+      })();
     }
+  }, [isSuccess, data, saveInitialData]);
 
+
+  const waitFor = async (predicate: () => boolean, timeout = 10000, interval = 150) => {
+    const start = Date.now();
+    while (!predicate()) {
+      if (Date.now() - start > timeout) return false;
+      await new Promise(res => setTimeout(res, interval));
+    }
+    return true;
+  };
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function prepareAndHide() {
+      if (!appReady) return;
+      // Start additional animations
+      startPulsing();
+      animateProgress();
+      Animated.sequence([
+        Animated.parallel([
+          Animated.timing(logoPosition, {
+            toValue: 0,
+            duration: 1200,
+            easing: Easing.out(Easing.cubic),
+            useNativeDriver: true,
+          }),
+          Animated.timing(logoRotation, {
+            toValue: 1,
+            duration: 1200,
+            easing: Easing.out(Easing.cubic),
+            useNativeDriver: true,
+          }),
+          Animated.spring(logoScale, {
+            toValue: 1,
+            tension: 60,
+            friction: 7,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.delay(300),
+        Animated.parallel([
+          Animated.timing(textOpacity, {
+            toValue: 1,
+            duration: 800,
+            easing: Easing.out(Easing.cubic),
+            useNativeDriver: true,
+          }),
+          Animated.timing(textOffset, {
+            toValue: 0,
+            duration: 800,
+            easing: Easing.out(Easing.cubic),
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.delay(800),
+      ]).start(async () => {
+
+        // Wait for data to be saved OR timeout after 10 seconds
+        const ok = await waitFor(() => isSuccess && dataSaved, 10000, 200);
+        if (!mounted) return;
+
+        await SplashScreen.hideAsync();
+        // Navigate even if data saving failed after timeout
+        if (isGuest || isLoggedIn) {
+          router.replace('/(drawer)/tabs/home');
+        } else {
+          router.replace("/(auth)/login");
+        }
+      });
+    }
     prepareAndHide();
-  }, [appReady, logoPosition, logoRotation, logoScale, isGuest, isLoggedIn, router, textOffset, textOpacity]);
+    return () => {
+      mounted = false;
+      // Clean up all animations
+      [logoPosition, logoRotation, logoScale, textOpacity, textOffset, pulseAnim, progressWidth, progressOpacity].forEach(
+        anim => anim.stopAnimation()
+      );
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appReady, isSuccess, dataSaved]); // Added dependencies
 
-  // Interpolate rotation value
   const rotate = logoRotation.interpolate({
     inputRange: [0, 1],
     outputRange: ['0deg', '360deg']
   });
 
+  const progressInterpolated = progressWidth.interpolate({
+    inputRange: [0, 100],
+    outputRange: ['0%', '100%']
+  });
+
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Animated Logo with spin and movement */}
-      <Animated.View style={[
-        styles.logoContainer,
+    <SafeAreaView style={{ backgroundColor: colors.background }}
+      className="flex-1 justify-center items-center px-5"
+    >
+      <Animated.View style={
         {
           transform: [
             { translateY: logoPosition },
             { rotate: rotate },
-            { scale: logoScale }
+            { scale: Animated.multiply(logoScale, pulseAnim) }
           ]
         }
-      ]}>
+      }
+        className="justify-center items-center"
+      >
         <Image
           source={require("@/assets/images/icon2.png")}
-          style={styles.logo}
           resizeMode="cover"
+          className="w-52 h-52 rounded-2xl"
         />
       </Animated.View>
-
-      <View style={styles.spacer} />
-
-      {/* Gradient Text - Fixed Implementation */}
+      <View className="h-6" />
       <Animated.View style={{ opacity: textOpacity, transform: [{ translateY: textOffset }] }}>
-        {/* Use GradientText for the main title */}
         <GradientText
           colors={['#27d0ee', '#BE85FC']}
           style={{
             fontFamily: FONTS_CONSTANTS.semiBold,
-            fontSize: 18,
+            fontSize: 20,
             textAlign: 'center',
-            width: "100%"
+            width: "100%",
           }}
         >
           هليوبوليس الجديدة بين يديك
         </GradientText>
-
-        {/* Subtitle remains normal text */}
         <Text style={{
-          textAlign: 'center',
-          marginTop: 4,
-          fontSize: 14,
           color: colors.text,
           fontFamily: FONTS_CONSTANTS.medium
-        }}>
+        }}
+          className="text-center mt-1 text-lg flex-shrink"
+        >
           دليلك الشامل للخدمات والأخبار والمجتمع.
         </Text>
       </Animated.View>
-    </View>
+
+      {/* Progress Indicator */}
+      <Animated.View
+        style={{ opacity: progressOpacity }}
+        className="mt-10 items-center w-4/5"
+      >
+        <View
+          className="h-1 bg-black/10 w-full rounded overflow-hidden"
+        >
+          <Animated.View
+            style={{ width: progressInterpolated, backgroundColor: colors.primary }}
+            className="h-full rounded"
+          />
+        </View>
+        <Text style={{ color: colors.text, fontFamily: FONTS_CONSTANTS.medium }}
+          className="mt-2 text-sm"
+        >
+          جاري التحميل...
+        </Text>
+      </Animated.View>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logo: {
-    width: 200,
-    height: 200,
-    borderRadius: 16,
-  },
-  spacer: {
-    height: 24,
-  },
-  textContainer: {
-    alignItems: 'center',
-  },
-  gradientTextContainer: {
-    borderRadius: 8,
-    overflow: 'hidden',
-    marginBottom: 8,
-  },
-  gradientBackground: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  gradientText: {
-    fontFamily: FONTS_CONSTANTS.semiBold,
-    fontSize: 18,
-    textAlign: 'center',
-    color: 'white', // This text will appear on the gradient background
-  },
-  subtitle: {
-    textAlign: 'center',
-    marginTop: 4,
-    fontSize: 14,
-    fontFamily: FONTS_CONSTANTS.medium,
-  },
-});
