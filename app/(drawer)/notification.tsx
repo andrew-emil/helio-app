@@ -37,7 +37,7 @@ export default function NotificationWrapper() {
         <SafeAreaView className="animate-fade-in flex-1 w-full"
             style={{ backgroundColor: colors.background }}>
             <ScrollView
-            className="w-full flex-1"
+                className="w-full flex-1"
                 contentContainerStyle={{
                     padding: 16,
                     alignItems: "stretch",
@@ -53,10 +53,10 @@ export default function NotificationWrapper() {
                     {sortedNotifications.length > 0 ? (
                         <View className="space-y-4"
                         >
-                            {sortedNotifications.map((n) => {
+                            {sortedNotifications.map((n, index) => {
                                 return (
                                     <View
-                                        key={n.id}
+                                        key={index}
                                         className="p-4 rounded-lg shadow-sm flex flex-row items-start gap-4"
                                         style={{ backgroundColor: colors.surface }}
                                     >

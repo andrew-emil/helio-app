@@ -18,7 +18,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({ icon, title, message, children 
     return (
         <View className={`text-center py-16 px-6 ${bg("bg-slate-50", "bg-slate-800/50")} rounded-lg items-center`}>
             {/* Icon wrapper */}
-            <View className={`flex items-center justify-center h-16 w-16 rounded-full ${bg(" bg-slate-200", "bg-slate-700")}`}>
+            <View className={`flex items-center  justify-center h-20 w-20 rounded-full ${bg(" bg-slate-200", "bg-slate-700")}`}>
                 {icon}
             </View>
 

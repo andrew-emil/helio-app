@@ -60,3 +60,12 @@ export interface RatingDocData {
     comment?: string;     // user's comment (optional)
     createdAt: Date;      // timestamp
 }
+
+export type emerencyType = "city" | "national"
+
+export interface EmerengyDocData {
+    id: string;
+    name: string;
+    phone: string;
+    type: emerencyType
+}

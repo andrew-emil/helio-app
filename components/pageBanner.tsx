@@ -15,7 +15,7 @@ const PageBanner: React.FC<PageBannerProps> = ({ title, subtitle, icon }) => {
     const { bg } = useBg()
 
     return (
-        < View className={`py-8 sm:py-12 border-b ${bg("border-slate-200", "border-slate-800")} mx-2`
+        < View className={`p-8 rounded border-b ${bg("border-slate-200", "border-slate-800")} mx-2`
         }
             style={{ backgroundColor: colors.surface }}>
 
