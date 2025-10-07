@@ -1,7 +1,7 @@
 import { ServiceDocData } from "@/types/firebaseDocs.type";
 import { DocumentData, QuerySnapshot, Timestamp } from "firebase/firestore";
 
-export function groupBySyubCategories(itemsSnap: QuerySnapshot<DocumentData, DocumentData>): Record<string, ServiceDocData[]> {
+export function groupBySubCategories(itemsSnap: QuerySnapshot<DocumentData>): Record<string, ServiceDocData[]> {
     const grouped: Record<string, ServiceDocData[]> = {};
 
     for (const itemDoc of itemsSnap.docs) {
@@ -22,11 +22,10 @@ export function groupBySyubCategories(itemsSnap: QuerySnapshot<DocumentData, Doc
             workTime: data.workTime ?? "",
         };
 
-        if (!grouped[service.subCategory]) {
-            grouped[service.subCategory] = [];
-        }
-        grouped[service.subCategory].push(service);
+        const key = service.subCategory ?? "uncategorized";
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(service);
     }
-    return grouped
 
+    return grouped;
 }

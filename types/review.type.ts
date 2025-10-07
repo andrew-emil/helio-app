@@ -3,8 +3,7 @@ export interface Review {
     serviceName: string;
     rating: number;
     comment: string;
-    date: string;
-    adminReply?: string;
+    createdAt: Date;
 }
 
 export interface UserReviewsProps {

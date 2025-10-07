@@ -1,3 +1,4 @@
+/* same imports as before */
 import { FONTS_CONSTANTS } from "@/constants/fontsConstants";
 import { useTheme } from "@/context/themeContext";
 import { ServiceDocData } from "@/types/firebaseDocs.type";
@@ -9,6 +10,7 @@ import {
     ImageBackground,
     Keyboard,
     Pressable,
+    StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
@@ -55,15 +57,12 @@ export default function HeroSection({
         if (typingTimeout.current) {
             clearTimeout(typingTimeout.current);
         }
-
         typingTimeout.current = window.setTimeout(() => {
             filterServices(query);
         }, 150);
-
         return () => {
             if (typingTimeout.current) clearTimeout(typingTimeout.current);
         };
-
     }, [filterServices, query, services]);
 
 
@@ -75,22 +74,27 @@ export default function HeroSection({
     }, []);
 
 
+    //TODO: fix the search
     const handleSelect = (service: ServiceDocData) => {
+        // navigate only when the user taps a suggestion
+        console.log(service)
         setQuery(service.name);
         setShowSuggestions(false);
         inputRef.current?.blur();
-
         router.push(`/(drawer)/category/${encodeURIComponent(service.category)}`);
     };
 
-
+    // <-- CHANGED: do NOT navigate on submit; just keep suggestions visible
     const handleSubmitEditing = () => {
+        // If there are results, keep suggestions open and focus the list (user must tap)
         if (results.length > 0) {
-            handleSelect(results[highlightIndex]);
-        } else {
-
-            inputRef.current?.blur();
+            setShowSuggestions(true);
+            setHighlightIndex(0);
+            // don't call handleSelect; require explicit tap
+            return;
         }
+        // If no results, simply dismiss keyboard
+        inputRef.current?.blur();
     };
 
 
@@ -111,19 +115,19 @@ export default function HeroSection({
         );
     };
 
-
     const keyExtractor = (item: ServiceDocData) => item.id;
 
     return (
         <ImageBackground
-            source={{ uri: "https://picsum.photos/1600/900?grayscale" }}
+            source={require("@/assets/images/hero.jpg")}
             resizeMode="cover"
-            imageStyle={{ opacity: 0.1 }}
+            style={styles.heroBackground}
+            imageStyle={{ opacity: 0.25 }}
         >
-            {/* optional overlay for theme tint */}
-            <View style={{ backgroundColor: colors.background + "80" }} />
+            {/* overlay */}
+            <View style={[StyleSheet.absoluteFillObject, { backgroundColor: colors.background + "40" }]} pointerEvents="none" />
 
-            <View className="pb-16 px-6 items-center justify-center">
+            <View className="pb-16 px-6 items-center justify-center" style={styles.heroContent}>
                 {/* Title */}
                 <GradientText
                     colors={["#27d0ee", "#BE85FC"]}
@@ -158,12 +162,14 @@ export default function HeroSection({
                             alignSelf: "center",
                         }}
                     >
+                        {/* ---------- TextInput (replace your current one) ---------- */}
                         <TextInput
-
+                            ref={inputRef}
                             placeholder={placeholder}
                             placeholderTextColor="#9ca3af"
                             value={query}
                             onChangeText={(t) => {
+                                // keep behavior same
                                 setQuery(t);
                                 setShowSuggestions(true);
                             }}
@@ -171,12 +177,35 @@ export default function HeroSection({
                                 if (query.length > 0) setShowSuggestions(true);
                             }}
                             onBlur={() => {
-
+                                // keep small delay so list taps still register
                                 setTimeout(() => setShowSuggestions(false), 120);
                             }}
-                            onSubmitEditing={handleSubmitEditing}
+
+                            /* --- KEY PARTS --- */
+                            onKeyPress={({ nativeEvent }) => {
+                                // catches Enter / Return key in many cases
+                                // Android keyboards sometimes report 'Enter', '\n' or 'Search'
+                                const k = nativeEvent.key;
+                                // debug: console.log("onKeyPress key:", k);
+                                if (k === "Enter" || k === "\n" || k === "Search") {
+                                    handleSubmitEditing();
+                                }
+                            }}
+                            onSubmitEditing={(e) => {
+                                // on some keyboards this will fire — handle it too
+                                handleSubmitEditing();
+                            }}
+                            onEndEditing={(e) => {
+                                // fallback: when input loses focus (keyboard hidden), call handler
+                                // this will also fire when user taps outside or the IME hides
+                                handleSubmitEditing();
+                            }}
+
+                            blurOnSubmit={true}
+                            multiline={false}
                             returnKeyType="search"
-                            className="w-full pl-4 pr-12 py-3 text-base rounded-full shadow-lg focus:outline-none"
+
+                            className="w-full pl-4 pr-12 py-3 text-sm rounded-full shadow-lg focus:outline-none"
                             style={{
                                 backgroundColor: colors.surface,
                                 color: colors.text,
@@ -184,15 +213,19 @@ export default function HeroSection({
                             }}
                         />
 
-                        {/* search icon */}
-                        <Ionicons
-                            name="search"
-                            size={20}
-                            color="#9ca3af"
-                            style={{ position: "absolute", right: 16, top: "25%" }}
-                        />
+                        {/* ---------- Search icon + clear button (replace your current icon block) ---------- */}
+                        {/* make search icon tappable so user can explicitly invoke submit */}
+                        <TouchableOpacity
+                            onPress={() => {
+                                // keep keyboard open or blur depending on desired behaviour
+                                // if you want keyboard to hide on press: inputRef.current?.blur();
+                                handleSubmitEditing();
+                            }}
+                            style={{ position: "absolute", right: 44, top: "25%" }}
+                        >
+                            <Ionicons name="search" size={20} color="#9ca3af" />
+                        </TouchableOpacity>
 
-                        {/* clear button */}
                         {query.length > 0 && (
                             <Pressable
                                 onPress={() => {
@@ -201,11 +234,12 @@ export default function HeroSection({
                                     setShowSuggestions(false);
                                     inputRef.current?.focus();
                                 }}
-                                style={{ position: "absolute", right: 16, top: "25%" }}
+                                style={{ position: "absolute", right: 12, top: "25%" }}
                             >
                                 <Ionicons name="close-circle" size={20} color="#9ca3af" />
                             </Pressable>
                         )}
+
                     </View>
 
                     {/* Suggestions dropdown */}
@@ -236,39 +270,42 @@ export default function HeroSection({
                                 </View>
                             ) : (
                                 <FlatList
-                                    keyboardShouldPersistTaps="handled"
+                                    keyboardShouldPersistTaps='always'
                                     data={results}
                                     keyExtractor={keyExtractor}
-                                    renderItem={({ item, index }) => (
-                                        <TouchableOpacity
-                                            onPress={() => handleSelect(item)}
-                                            style={{
-                                                paddingVertical: 10,
-                                                paddingHorizontal: 14,
-                                                borderTopWidth: index === 0 ? 0 : 1,
-                                                borderTopColor: colors.background + "20",
-                                                backgroundColor: index === highlightIndex ? colors.background + "10" : "transparent",
-                                            }}
-                                        >
-                                            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-                                                <View style={{ flex: 1 }}>
-                                                    {renderHighlighted(item.name, query)}
-                                                    {item.subCategory ? (
-                                                        <Text
-                                                            style={{
-                                                                fontSize: 12,
-                                                                marginTop: 2,
-                                                                color: colors.text + "99",
-                                                                fontFamily: FONTS_CONSTANTS.medium,
-                                                            }}
-                                                        >
-                                                            {item.subCategory}
-                                                        </Text>
-                                                    ) : null}
+                                    renderItem={({ item, index }) => {
+                                        return (
+                                            <TouchableOpacity
+                                                onPress={() => handleSelect(item)} // navigation only here
+                                                style={{
+                                                    paddingVertical: 10,
+                                                    paddingHorizontal: 14,
+                                                    borderTopWidth: index === 0 ? 0 : 1,
+                                                    borderTopColor: colors.background + "20",
+                                                    backgroundColor: index === highlightIndex ? colors.background + "10" : "transparent",
+                                                    width: '100%'
+                                                }}
+                                            >
+                                                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                                                    <View style={{ flex: 1 }}>
+                                                        {renderHighlighted(item.name, query)}
+                                                        {item.subCategory ? (
+                                                            <Text
+                                                                style={{
+                                                                    fontSize: 12,
+                                                                    marginTop: 2,
+                                                                    color: colors.text + "99",
+                                                                    fontFamily: FONTS_CONSTANTS.medium,
+                                                                }}
+                                                            >
+                                                                {item.subCategory}
+                                                            </Text>
+                                                        ) : null}
+                                                    </View>
                                                 </View>
-                                            </View>
-                                        </TouchableOpacity>
-                                    )}
+                                            </TouchableOpacity>
+                                        )
+                                    }}
                                 />
                             )}
                         </View>
@@ -278,3 +315,15 @@ export default function HeroSection({
         </ImageBackground>
     );
 }
+
+const styles = StyleSheet.create({
+    heroBackground: {
+        width: '100%',
+        minHeight: 220,
+        justifyContent: 'center',
+    },
+    heroContent: {
+        paddingTop: 24,
+        paddingBottom: 24,
+    },
+});

@@ -57,7 +57,7 @@ export default function Contact() {
                 <PageBanner
                     title="تواصل معنا"
                     subtitle="نسعد بسماع آرائكم ومقترحاتكم. فريقنا جاهز للرد على استفساراتكم."
-                    icon={<Ionicons name="call" size={22} color="#06b6d4" />}
+                    icon={<Ionicons name="call" size={48} color="#06b6d4" />}
                 />
                 <View className="p-6 rounded-2xl shadow flex-1"
                     style={{ backgroundColor: colors.background }}>

@@ -8,7 +8,6 @@ import { Image, Linking, Text, TouchableOpacity, View } from "react-native";
 const PropertyCard: React.FC<{ property: PropertyDocData }> = ({ property }) => {
     const navigation = useNavigation();
     const { colors } = useTheme()
-    console.log(property)
 
     return (
         <TouchableOpacity

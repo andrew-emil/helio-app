@@ -1,0 +1,40 @@
+export const PROFILE_CONSTANTS = {
+  COLORS: {
+    MUTED: '#9CA3AF',
+    BORDER_LIGHT: '#e5e7eb',
+    BORDER_DARK: '#374151',
+    SURFACE_LIGHT: '#f8fafc',
+    SURFACE_DARK: 'rgba(15,23,42,0.6)',
+    BUTTON_EDIT_LIGHT: '#e6eef7',
+    BUTTON_EDIT_DARK: '#374151',
+    BUTTON_DELETE_LIGHT: '#fee2e2',
+    BUTTON_DELETE_DARK: 'rgba(153,27,27,0.14)',
+    ERROR_RED: '#dc2626',
+    ERROR_TEXT_LIGHT: '#b91c1c',
+    ERROR_TEXT_DARK: '#fca5a5',
+  },
+  SIZES: {
+    AVATAR_LARGE: 92,
+    AVATAR_SMALL: 72,
+    BORDER_RADIUS: 12,
+    BORDER_RADIUS_SMALL: 8,
+    SPACING: {
+      SMALL: 8,
+      MEDIUM: 12,
+      LARGE: 16,
+      XLARGE: 24,
+    },
+  },
+  TEXT: {
+    USERNAME_SIZE: 26,
+    EMAIL_SIZE: 16,
+    JOINED_SIZE: 12,
+    SECTION_TITLE_SIZE: 20,
+    MODAL_TITLE_SIZE: 18,
+    BUTTON_TEXT_SIZE: 13,
+  },
+  MODAL: {
+    OVERLAY_BACKGROUND: 'rgba(0,0,0,0.45)',
+    MAX_WIDTH: 520,
+  },
+} as const;

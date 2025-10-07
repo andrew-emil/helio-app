@@ -7,7 +7,7 @@ import useFontsLoader from "@/hooks/useFontLoader";
 import { useSplashData } from "@/hooks/useSplashData";
 import { useRouter } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useRef, useState } from "react"; // Added useState
+import { useEffect, useRef, useState } from "react";
 import { Animated, Easing, Image, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -18,16 +18,15 @@ export default function App() {
   const { isGuest, isLoggedIn } = useUser();
   const appReady = useFontsLoader();
   const { colors } = useTheme();
-  const { data, isSuccess } = useSplashData();
+  const { data, isSuccess, isLoading, isError, error } = useSplashData();
+  const { saveInitialData } = useData();
 
-  // Existing animations
+  // Your existing animation refs
   const logoPosition = useRef(new Animated.Value(300)).current;
   const logoRotation = useRef(new Animated.Value(0)).current;
   const logoScale = useRef(new Animated.Value(0.5)).current;
   const textOpacity = useRef(new Animated.Value(0)).current;
   const textOffset = useRef(new Animated.Value(30)).current;
-
-  // New pulsing and progress animations
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const progressWidth = useRef(new Animated.Value(0)).current;
   const progressOpacity = useRef(new Animated.Value(0)).current;
@@ -37,6 +36,7 @@ export default function App() {
   const savedRef = useRef(false);
 
   // Start pulsing animation
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const startPulsing = () => {
     Animated.loop(
       Animated.sequence([
@@ -73,39 +73,38 @@ export default function App() {
     ]).start();
   };
 
-  // inside your splash component (top-level imports unchanged)
-  const { saveInitialData } = useData(); // <- use the new method
-
+  // Handle data saving
   useEffect(() => {
     if (isSuccess && data && !savedRef.current) {
       savedRef.current = true;
 
+      console.log('💾 Splash: Starting to save data to context...');
       (async () => {
         try {
-          // Pass the whole payload and wait until state updates are scheduled
           await saveInitialData({
             services: data.services ?? [],
             news: data.news ?? [],
             advertisements: data.advertisements ?? [],
             properties: data.properties ?? [],
           });
-
-          // Now it's safe to mark dataSaved and continue
+          console.log('✅ Splash: Data saved to context successfully');
           setDataSaved(true);
-        } catch (err) {
-          console.warn("saveInitialData failed:", err);
-          // still continue so the splash doesn't block forever
+        } catch (saveError) {
+          console.error('❌ Splash: Failed to save data to context', saveError);
+          // Still set dataSaved to true to prevent infinite hanging
           setDataSaved(true);
         }
       })();
     }
   }, [isSuccess, data, saveInitialData]);
 
-
   const waitFor = async (predicate: () => boolean, timeout = 10000, interval = 150) => {
     const start = Date.now();
     while (!predicate()) {
-      if (Date.now() - start > timeout) return false;
+      if (Date.now() - start > timeout) {
+        console.log('⏰ Splash: Wait timeout reached');
+        return false;
+      }
       await new Promise(res => setTimeout(res, interval));
     }
     return true;
@@ -115,10 +114,17 @@ export default function App() {
     let mounted = true;
 
     async function prepareAndHide() {
-      if (!appReady) return;
-      // Start additional animations
+      if (!appReady) {
+        console.log('⏳ Splash: App not ready yet');
+        return;
+      }
+
+      console.log('🎬 Splash: Starting animations and data loading');
+
+      // Start animations
       startPulsing();
       animateProgress();
+
       Animated.sequence([
         Animated.parallel([
           Animated.timing(logoPosition, {
@@ -157,13 +163,24 @@ export default function App() {
         ]),
         Animated.delay(800),
       ]).start(async () => {
+        if (!mounted) return;
+
+        console.log('⏳ Splash: Waiting for data to be saved...', {
+          isSuccess,
+          dataSaved,
+          hasData: !!data,
+          isLoading
+        });
 
         // Wait for data to be saved OR timeout after 10 seconds
-        const ok = await waitFor(() => isSuccess && dataSaved, 10000, 200);
+        await waitFor(() => isSuccess && dataSaved, 10000, 200);
+
         if (!mounted) return;
 
         await SplashScreen.hideAsync();
-        // Navigate even if data saving failed after timeout
+        console.log('🚀 Splash: Navigating to home page');
+
+        // Navigate based on auth status
         if (isGuest || isLoggedIn) {
           router.replace('/(drawer)/tabs/home');
         } else {
@@ -171,7 +188,9 @@ export default function App() {
         }
       });
     }
+
     prepareAndHide();
+
     return () => {
       mounted = false;
       // Clean up all animations
@@ -179,9 +198,9 @@ export default function App() {
         anim => anim.stopAnimation()
       );
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appReady, isSuccess, dataSaved]); // Added dependencies
+  }, [appReady, isSuccess, dataSaved, isGuest, isLoggedIn, startPulsing, animateProgress, logoPosition, logoRotation, logoScale, textOpacity, textOffset, data, isLoading, router, pulseAnim, progressWidth, progressOpacity]);
 
+  // Your existing animation interpolations and JSX remain the same
   const rotate = logoRotation.interpolate({
     inputRange: [0, 1],
     outputRange: ['0deg', '360deg']
@@ -191,6 +210,13 @@ export default function App() {
     inputRange: [0, 100],
     outputRange: ['0%', '100%']
   });
+
+  // Show error state if data fetching failed
+  if (isError) {
+    console.log('❌ Splash: Data fetch error, proceeding anyway', error);
+    // Continue with navigation even if data fetch fails
+    // You might want to show a subtle error indicator
+  }
 
   return (
     <SafeAreaView style={{ backgroundColor: colors.background }}
@@ -252,7 +278,9 @@ export default function App() {
         <Text style={{ color: colors.text, fontFamily: FONTS_CONSTANTS.medium }}
           className="mt-2 text-sm"
         >
-          جاري التحميل...
+          {isLoading ? "جاري تحميل البيانات..." :
+            isError ? "جاري التحضير..." :
+              "جاري التحميل..."}
         </Text>
       </Animated.View>
     </SafeAreaView>

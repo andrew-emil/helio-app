@@ -9,6 +9,12 @@ module.exports = {
   theme: {
     extend: {
       keyframes: {
+        fontFamily: {
+          cairo: ["Cairo-Regular"],
+          medium: ["Cairo-Medium"],
+          semibold: ["Cairo-SemiBold"],
+          bold: ["Cairo-Bold"],
+        },
         "fade-in": {
           "0%": { opacity: 0 },
           "100%": { opacity: 1 },

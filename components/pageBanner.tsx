@@ -15,7 +15,7 @@ const PageBanner: React.FC<PageBannerProps> = ({ title, subtitle, icon }) => {
     const { bg } = useBg()
 
     return (
-        < View className={`py-8 sm:py-12 border-b ${bg("border-slate-200", "border-slate-800")}`
+        < View className={`py-8 sm:py-12 border-b ${bg("border-slate-200", "border-slate-800")} mx-2`
         }
             style={{ backgroundColor: colors.surface }}>
 
@@ -47,7 +47,7 @@ const PageBanner: React.FC<PageBannerProps> = ({ title, subtitle, icon }) => {
                 {
                     subtitle && (
                         <Text
-                            className="mt-3 max-w-2xl mx-auto text-md sm:text-lg text-center"
+                            className="mt-4 max-w-2xl mx-auto text-md sm:text-lg text-center"
                             style={{ color: colors.muted, fontFamily: FONTS_CONSTANTS.semiBold }}
                         >
                             {subtitle}

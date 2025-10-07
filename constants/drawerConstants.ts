@@ -1,24 +1,28 @@
 import { FontAwesome, FontAwesome6, Ionicons } from '@expo/vector-icons';
 import React from 'react';
 
-
 export const drawerSections = [
     // First section - Main features
     [
+        { name: "tabs", label: "الرئيسية", icon: ({ color }: { color: string }) => React.createElement(Ionicons, { name: "home", size: 22, color }) },
         { name: "favorites", label: "المفضلة", icon: () => React.createElement(Ionicons, { name: "heart-outline", size: 22, color: "red" }) },
+    ],
+    // SEPARATOR 1
+    // Second section
+    [
         { name: "news", label: "الأخبار", icon: () => React.createElement(Ionicons, { name: "newspaper-outline", size: 22, color: "#2F3868" }) },
         { name: "community", label: "المجتمع", icon: () => React.createElement(Ionicons, { name: "chatbubble-ellipses-outline", size: 22, color: "#1C384B" }) },
         { name: "market", label: "البيع و الشراء", icon: () => React.createElement(FontAwesome, { name: "shopping-bag", size: 22, color: "yellow" }) },
         { name: "jobs", label: "الوظائف", icon: () => React.createElement(Ionicons, { name: "briefcase-outline", size: 22, color: "#84CC16" }) },
     ],
-    // SEPARATOR 1
+    // SEPARATOR 2
     // Second section - Services
     [
         { name: "buses", label: "المواصلات", icon: () => React.createElement(FontAwesome6, { name: "truck", size: 22, color: "#5F4892" }) },
         { name: "cityAgencyServices", label: "خدمات جهاز المدينة", icon: () => React.createElement(Ionicons, { name: "documents-outline", size: 22, color: "#0EA5E9" }) },
-        { name: "AboutCity", label: "عن المدينة و الشركة", icon: () => React.createElement(FontAwesome6, { name: "building-columns", size: 22, color: "#22C55E" }) },
+        { name: "aboutCity", label: "عن المدينة و الشركة", icon: () => React.createElement(FontAwesome6, { name: "building-columns", size: 22, color: "#22C55E" }) }, // Fixed: "AboutCity" → "aboutCity"
     ],
-    // SEPARATOR 2
+    // SEPARATOR 3
     // Third section - Information
     [
         { name: "about", label: "من نحن", icon: ({ color }: { color: string }) => React.createElement(Ionicons, { name: "information-circle", size: 22, color }) },

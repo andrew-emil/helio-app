@@ -7,6 +7,7 @@ import {
 } from "firebase/auth";
 import { auth } from "./firebase";
 import { saveUserProfile } from "./user";
+
 // Register new user
 export async function register(
     email: string,
@@ -70,7 +71,7 @@ export async function loginWithGoogle(idToken: string) {
 }
 
 // Logout
-export async function logout() {
+export async function firebaseLogout() {
     try {
         await auth.signOut();
         return true;

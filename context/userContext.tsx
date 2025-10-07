@@ -1,3 +1,4 @@
+import { firebaseLogout } from "@/services/firebase/firebaseAuth";
 import { UserStorage } from "@/services/storage/userStoage";
 import { UserContextValue, UserData } from "@/types/userContext.type";
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
@@ -23,6 +24,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     const logout = async () => {
         try {
             await UserStorage.clearUserData()
+            await firebaseLogout()
             setIsLoggedIn(false);
             _setUser(null)
             setIsGuest(true);

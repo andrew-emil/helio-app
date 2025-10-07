@@ -7,6 +7,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 const UserReviews: React.FC<UserReviewsProps> = ({ userReviews }) => {
     const { colors } = useTheme()
+
     // Render star rating component
     const renderStars = (rating: number) => {
         return (
@@ -37,36 +38,26 @@ const UserReviews: React.FC<UserReviewsProps> = ({ userReviews }) => {
                 showsVerticalScrollIndicator={false}
             >
                 {userReviews.length > 0 ? (
-                    userReviews.map((review) => (
-                        <View key={review.id} style={styles.reviewCard}>
+                    userReviews.map((review, index) => (
+                        <View key={index} style={[styles.reviewCard, { backgroundColor: colors.surface, borderColor: colors.surface }]}>
                             {/* Review Header */}
                             <View style={styles.reviewHeader}>
-                                <Text style={styles.serviceText}>
+                                <Text style={[styles.serviceText, { color: colors.text }]}>
                                     تقييم لـ <Text style={styles.serviceName}>{review.serviceName}</Text>
                                 </Text>
-                                <Text style={styles.dateText}>{review.date}</Text>
+                                <Text style={styles.dateText}>{review.createdAt.toLocaleDateString('ar-EG')}</Text>
                             </View>
 
                             {/* Star Rating */}
                             {renderStars(review.rating)}
 
                             {/* Comment */}
-                            <Text style={styles.commentText}>{review.comment}</Text>
-
-                            {/* Admin Reply */}
-                            {review.adminReply && (
-                                <View style={styles.adminReplyContainer}>
-                                    <View style={styles.adminReplyBorder} />
-                                    <Text style={styles.adminReplyText}>
-                                        رد الإدارة: {review.adminReply}
-                                    </Text>
-                                </View>
-                            )}
+                            <Text style={[styles.commentText, { color: colors.text }]}>{review.comment}</Text>
                         </View>
                     ))
                 ) : (
                     <View style={styles.emptyState}>
-                        <Text style={styles.emptyStateText}>
+                        <Text style={[styles.emptyStateText, { color: colors.text }]}>
                             لم تقم بإضافة أي تقييمات بعد.
                         </Text>
                     </View>
@@ -98,26 +89,25 @@ const styles = StyleSheet.create({
     reviewCard: {
         padding: 16,
         borderRadius: 12,
-        backgroundColor: '#F8FAFC',
         marginBottom: 16,
         borderWidth: 1,
-        borderColor: '#E2E8F0',
+        elevation: 2
     },
     reviewHeader: {
-        flexDirection: 'row',
+        flexDirection: 'column',
         justifyContent: 'space-between',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         marginBottom: 8,
     },
     serviceText: {
         fontSize: 16,
         fontWeight: '600',
         color: '#374151',
-        textAlign: 'right',
+        textAlign: 'left',
     },
     serviceName: {
-        fontWeight: 'bold',
         color: '#0891B2',
+        fontFamily: FONTS_CONSTANTS.bold
     },
     dateText: {
         fontSize: 12,

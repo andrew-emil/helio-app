@@ -1,151 +1,129 @@
+import { useTheme } from "@/context/themeContext";
 import { AdvertisementsDocData } from "@/types/firebaseDocs.type";
+import { toRgba } from "@/utils/toRgb";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-    View,
-    Image,
-    Text,
+    ImageBackground,
     StyleSheet,
-    Dimensions,
-    TouchableOpacity,
-    ViewStyle,
-    TextStyle,
-    ImageStyle,
+    Text,
+    View
 } from "react-native";
-import { useSharedValue } from "react-native-reanimated";
-import Carousel from "react-native-reanimated-carousel";
-
-const { width: screenWidth } = Dimensions.get("window");
+import Swiper from 'react-native-swiper';
 
 type SliderProps = {
     adverts: AdvertisementsDocData[]; // passed from Home
-    carouselWidth?: number;
-    carouselHeight?: number;
-    onItemPress?: (item: AdvertisementsDocData) => void;
-};
+}
 
 function SliderItem({ item }: { item: AdvertisementsDocData }) {
+    const { colors } = useTheme();
+    const overlayColor = toRgba(colors.background ?? "#000000", 0.45);
+
     return (
-        <View style={styles.slideWrapper}>
-            <Image source={{ uri: item.imageUrl }} style={styles.image} resizeMode="cover" />
-            <View style={styles.overlay} />
-            {!!item.title && (
-                <View style={styles.titleContainer}>
-                    <Text numberOfLines={2} style={styles.titleText}>
-                        {item.title}
-                    </Text>
-                </View>
-            )}
+        <View
+            className="h-48 w-full overflow-hidden rounded-xl flex-1 justify-center">
+            <ImageBackground
+                source={{ uri: item.imageUrl }}
+                resizeMode='stretch'
+                style={[styles.imageBackground, { backgroundColor: colors.surface ?? "#111" }]}
+                imageStyle={styles.imageStyle}
+            >
+                <View style={[styles.overlay, { backgroundColor: overlayColor }]} pointerEvents="none" />
+                {item.title ? (
+                    <View style={styles.titleContainer}>
+                        <Text numberOfLines={2} style={styles.titleText}>{item.title}</Text>
+                    </View>
+                ) : null}
+            </ImageBackground>
         </View>
     );
 }
+
 
 export default function Slider({
     adverts,
-    carouselWidth = Math.round(screenWidth),
-    carouselHeight = 258,
-    onItemPress,
 }: SliderProps) {
-    const scrollOffsetValue = useSharedValue<number>(0);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
+    const { colors } = useTheme();
 
-    // Use a memoized version of items to avoid unnecessary rerenders
+    // duplicate so there are at least two slides for loop/pagination testing
     const items = useMemo(() => {
-        if (adverts && adverts.length > 0) return adverts;
-        // optional small fallback so the Carousel always has something
-        return [
-            {
-                id: "placeholder-1",
-                createdAt: new Date(),
-                imageUrl: "https://picsum.photos/800/400?random=1",
-                title: "Placeholder",
-            },
-        ] as AdvertisementsDocData[];
+        return adverts.map((ad) => ({
+            id: ad.id,
+            title: ad.title ?? "",
+            imageUrl: ad.imageUrl,
+            createdAt: ad.createdAt,
+        }));
     }, [adverts]);
 
     useEffect(() => {
-        // if the current index is out-of-bounds after adverts update, reset to 0
         if (currentIndex >= items.length) setCurrentIndex(0);
-    }, [items, currentIndex]);
+    }, [currentIndex, items.length]);
+
+    const showControls = items.length > 1;
+
+    const Dot = ({ active = false }: { active?: boolean }) => (
+        <View
+            style={[
+                styles.dot,
+                {
+                    backgroundColor: active ? (colors.text ?? "#FFF") : (colors.muted ?? "rgba(255,255,255,0.4)"),
+                    width: active ? 14 : 10,
+                    height: active ? 14 : 10,
+                    borderRadius: active ? 10 : 6,
+                }
+            ]}
+        />
+    );
 
     return (
-        <View style={styles.container} testID="carousel-component">
-            <Carousel
-                testID={"carousel-adverts"}
-                loop={items.length > 1}
-                width={carouselWidth}
-                height={carouselHeight}
-                snapEnabled
-                pagingEnabled
-                autoPlayInterval={3000}
-                data={items}
-                defaultScrollOffsetValue={scrollOffsetValue}
-                style={{ width: "100%" }}
-                onConfigurePanGesture={(g: { enabled: (arg0: boolean) => any }) => {
-                    "worklet";
-                    g.enabled(false);
-                }}
-                onSnapToItem={(index: number) => setCurrentIndex(index)}
-                renderItem={({ item, index }: { item: AdvertisementsDocData; index: number }) => (
-                    <TouchableOpacity
-                        activeOpacity={0.95}
-                        style={{ flex: 1 }}
-                        onPress={() => onItemPress?.(item)}
-                    >
-                        <SliderItem item={item} />
-                    </TouchableOpacity>
-                )}
-            />
-
-            {/* Pagination */}
-            <View style={styles.dotsWrapper}>
-                {items.map((_, i) => {
-                    const isActive = i === currentIndex;
-                    return <View key={`dot-${i}`} style={[styles.dot, isActive && styles.activeDot]} />;
-                })}
-            </View>
+        <View style={styles.container}
+        >
+            <Swiper
+                showsPagination={showControls}
+                showsButtons={showControls}
+                autoplay={showControls}
+                loop={showControls}
+                paginationStyle={styles.paginationStyle}
+                // pass React elements for dot/activeDot
+                dot={<Dot active={false} />}
+                activeDot={<Dot active={true} />}
+                onIndexChanged={(i) => setCurrentIndex(i)}
+            >
+                {items.map((ad, idx) => (
+                    <SliderItem item={ad} key={`${ad.id ?? idx}-${idx}`} />
+                ))}
+            </Swiper>
         </View>
     );
 }
 
-const styles = StyleSheet.create<{
-    container: ViewStyle;
-    slideWrapper: ViewStyle;
-    image: ImageStyle;
-    overlay: ViewStyle;
-    titleContainer: ViewStyle;
-    titleText: TextStyle;
-    dotsWrapper: ViewStyle;
-    dot: ViewStyle;
-    activeDot: ViewStyle;
-}>({
+const styles = StyleSheet.create({
     container: {
-        width: "100%",
         alignItems: "center",
+        flex: 1,
+        flexDirection: 'column',
+        gap: 12
     },
-    slideWrapper: {
-        width: "100%",
-        height: "100%",
+    imageBackground: {
+        flex: 1,
+        justifyContent: "flex-end",
+        minHeight: 200,
+        overflow: 'visible',
+        zIndex: 12
+    },
+    imageStyle: {
         borderRadius: 12,
-        overflow: "hidden",
-        backgroundColor: "#ddd",
-        justifyContent: "center",
-    },
-    image: {
-        ...StyleSheet.absoluteFillObject,
-        width: undefined,
-        height: undefined,
+        overflow: 'visible'
     },
     overlay: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: "rgba(0,0,0,0.35)",
+        zIndex: 1,
     },
     titleContainer: {
-        position: "absolute",
-        bottom: 12,
-        right: 12,
-        left: 12,
         paddingVertical: 8,
         paddingHorizontal: 10,
+        zIndex: 2,
+        position: 'relative',
     },
     titleText: {
         color: "#fff",
@@ -155,23 +133,15 @@ const styles = StyleSheet.create<{
         textShadowOffset: { width: 0, height: 1 },
         textShadowRadius: 2,
     },
-    dotsWrapper: {
-        position: "absolute",
-        bottom: 8,
-        alignSelf: "center",
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-    },
     dot: {
-        width: 8,
-        height: 8,
-        borderRadius: 8,
-        backgroundColor: "rgba(255,255,255,0.5)",
         marginHorizontal: 4,
+        marginVertical: 8,
     },
-    activeDot: {
-        transform: [{ scale: 1.4 }],
-        backgroundColor: "rgba(255,255,255,0.95)",
+    paginationStyle: {
+        position: 'absolute',
+        bottom: -40, // Position dots below the image
+        alignSelf: 'center',
+        padding: 12,
+        borderRadius: 16,
     },
 });

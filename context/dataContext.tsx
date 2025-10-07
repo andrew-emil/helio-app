@@ -1,167 +1,207 @@
-// DataProvider.tsx
-import type { Advertisement, DataContextType, Property } from '@/types/dataContext.type';
-import type { AdvertisementsDocData, NewsDocData, PropertyDocData, ServiceDocData } from '@/types/firebaseDocs.type';
-import React, { createContext, ReactNode, useCallback, useContext, useState } from "react";
-import { useToast } from './toastContext';
+// context/dataContext.tsx
+import React, { createContext, useContext, useReducer, useEffect, useCallback } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import type {
+    ServiceDocData,
+    NewsDocData,
+    AdvertisementsDocData,
+    PropertyDocData,
+} from "@/types/firebaseDocs.type";
 
-type MaybeId = { id?: string };
-type GenericSet<T> = React.Dispatch<React.SetStateAction<T[]>>;
+const STORAGE_KEY = "appData_v1";
 
-const DataContext = createContext<DataContextType | undefined>(undefined);
-
-export const useData = (): DataContextType => {
-    const ctx = useContext(DataContext);
-    if (!ctx) throw new Error("useData must be used inside DataProvider");
-    return ctx;
+type State = {
+    services: ServiceDocData[];
+    news: NewsDocData[];
+    advertisements: AdvertisementsDocData[];
+    properties: PropertyDocData[];
+    isLoaded: boolean;
 };
 
-const genId = (): string => {
-    if (typeof crypto !== "undefined" && (crypto as any).randomUUID) return (crypto as any).randomUUID();
-    return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+const initialState: State = {
+    services: [],
+    news: [],
+    advertisements: [],
+    properties: [],
+    isLoaded: false,
 };
 
-export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const { showToast } = useToast();
+type Action =
+    | { type: "SET_ALL"; payload: Partial<State> }
+    | { type: "RESET" }
+    | { type: "SET_LOADED" };
 
-    const [services, setServices] = useState<ServiceDocData[]>([]);
-    const [news, setNews] = useState<NewsDocData[]>([]);
-    const [advertisements, setAdvertisements] = useState<AdvertisementsDocData[]>([]);
-    const [properties, setProperties] = useState<PropertyDocData[]>([]);
+function reducer(state: State, action: Action): State {
+    switch (action.type) {
+        case "SET_ALL":
+            return { ...state, ...action.payload };
+        case "RESET":
+            return initialState;
+        case "SET_LOADED":
+            return { ...state, isLoaded: true };
+        default:
+            return state;
+    }
+}
 
-    // genericSave / genericDelete unchanged (kept for CRUD usage)
-    const genericSave = useCallback(<T extends MaybeId>(
-        setItems: GenericSet<T>,
-        newItemData: Partial<T> & { id?: string },
-        itemName: string,
-        successMessage?: string
-    ) => {
-        let didUpdate = false;
+type ContextValue = State & {
+    saveInitialData: (payload: Partial<State>) => Promise<void>;
+    resetData: () => Promise<void>;
+};
 
-        setItems(prev => {
-            if (newItemData.id) {
-                const updated = prev.map(item =>
-                    // @ts-ignore
-                    item.id === newItemData.id
-                        ? { ...item, ...newItemData, updatedAt: new Date().toISOString() }
-                        : item
-                );
-                didUpdate = true;
-                return updated;
-            }
+const DataContext = createContext<ContextValue | undefined>(undefined);
 
-            const newItem: T = {
-                ...(newItemData as T),
-                id: genId(),
-                // @ts-ignore
-                createdAt: new Date().toISOString(),
-                // @ts-ignore
-                updatedAt: new Date().toISOString(),
-            } as T;
+/* ---------------------------
+   Helpers: serialize / deserialize
+   --------------------------- */
 
-            didUpdate = false;
-            console.log(`Added new ${itemName}:`, newItem.id);
-            return [newItem, ...prev];
-        });
+function serializeForStorage(s: State) {
+    const toIso = (d?: Date) => (d instanceof Date ? d.toISOString() : d ?? null);
 
-        if (didUpdate) {
-            showToast(successMessage || `تم تحديث ${itemName} بنجاح`);
-        } else {
-            showToast(successMessage || `تمت إضافة ${itemName} بنجاح`);
-        }
-    }, [showToast]);
+    return {
+        services: s.services.map((x) => ({ ...x, createdAt: toIso(x.createdAt) })),
+        news: s.news.map((x) => ({ ...x, createdAt: toIso(x.createdAt) })),
+        advertisements: s.advertisements.map((x) => ({ ...x, createdAt: toIso(x.createdAt) })),
+        properties: s.properties.map((x) => ({ ...x, createdAt: toIso(x.createdAt) })),
+    };
+}
 
-    const genericDelete = useCallback(<T extends { id: string }>(
-        setItems: GenericSet<T>,
-        itemId: string,
-        itemName: string
-    ) => {
-        setItems(prev => prev.filter(item => item.id !== itemId));
-        showToast(`تم حذف ${itemName} بنجاح`);
-    }, [showToast]);
+function deserializeFromStorage(raw: any): State {
 
-    // ---- Handlers for services ----
-    const handleSaveService = useCallback((service: Partial<ServiceDocData> & { id?: string }) => {
-        genericSave<ServiceDocData>(setServices, service, 'الخدمة');
-    }, [genericSave]);
+    const services: ServiceDocData[] = (raw?.services ?? []).map((x: any) => ({
+        ...x,
+        createdAt: x?.createdAt ? new Date(x.createdAt) : new Date(),
+    }));
 
-    const handleDeleteService = useCallback((serviceId: string) => {
-        genericDelete(setServices, serviceId, 'الخدمة');
-    }, [genericDelete]);
+    const news: NewsDocData[] = (raw?.news ?? []).map((x: any) => ({
+        ...x,
+        createdAt: x?.createdAt ? new Date(x.createdAt) : new Date(),
+    }));
 
-    // ---- Handlers for news ----
-    const handleSaveNews = useCallback((newsItem: Partial<NewsDocData> & { id?: string }) => {
-        genericSave<NewsDocData>(setNews, newsItem, 'الخبر');
-    }, [genericSave]);
+    const advertisements: AdvertisementsDocData[] = (raw?.advertisements ?? []).map((x: any) => ({
+        ...x,
+        createdAt: x?.createdAt ? new Date(x.createdAt) : new Date(),
+    }));
 
-    const handleDeleteNews = useCallback((newsId: string) => {
-        genericDelete(setNews, newsId, 'الخبر');
-    }, [genericDelete]);
+    const properties: PropertyDocData[] = (raw?.properties ?? []).map((x: any) => ({
+        ...x,
+        createdAt: x?.createdAt ? new Date(x.createdAt) : new Date(),
+        images: Array.isArray(x?.images) ? x.images : [],
+    }));
 
-    // ---- Handlers for advertisements ----
-    const handleSaveAdvertisement = useCallback((ad: Partial<Advertisement> & { id?: string }) => {
-        genericSave<AdvertisementsDocData>(setAdvertisements, ad, 'الإعلان');
-    }, [genericSave]);
-
-    const handleDeleteAdvertisement = useCallback((adId: string) => {
-        genericDelete(setAdvertisements, adId, 'الإعلان');
-    }, [genericDelete]);
-
-    // ---- Handlers for properties ----
-    const handleSaveProperty = useCallback((property: Partial<Property> & { id?: string }) => {
-        genericSave<PropertyDocData>(setProperties, property, 'العقار');
-    }, [genericSave]);
-
-    const handleDeleteProperty = useCallback((propertyId: string) => {
-        genericDelete(setProperties, propertyId, 'العقار');
-    }, [genericDelete]);
-
-    // ---------------------------
-    // NEW: saveInitialData - set all arrays in one shot
-    // Accepts the entire payload and returns a Promise that resolves after a microtask.
-    // This is intended for initial bulk loading (from your splash screen).
-    // ---------------------------
-    const saveInitialData = useCallback(async (payload: {
-        services?: ServiceDocData[];
-        news?: NewsDocData[];
-        advertisements?: AdvertisementsDocData[];
-        properties?: PropertyDocData[];
-    }) => {
-        // Normalize missing arrays to empty arrays
-        const s = payload.services ?? [];
-        const n = payload.news ?? [];
-        const a = payload.advertisements ?? [];
-        const p = payload.properties ?? [];
-
-        // Update state in one go (multiple setState calls — React will batch these)
-        setServices(s);
-        setNews(n);
-        setAdvertisements(a);
-        setProperties(p);
-
-        // Wait a tick to give React a chance to schedule renders / updates.
-        // If you need stronger guarantees, bump the delay slightly.
-        await new Promise<void>((res) => setTimeout(() => res(), 0));
-    }, []);
-
-    const value: DataContextType = {
+    return {
         services,
         news,
         advertisements,
         properties,
+        isLoaded: true,
+    };
+}
 
-        handleSaveService,
-        handleSaveNews,
-        handleSaveAdvertisement,
-        handleSaveProperty,
+/* ---------------------------
+   Provider implementation
+   --------------------------- */
 
-        handleDeleteService,
-        handleDeleteNews,
-        handleDeleteAdvertisement,
-        handleDeleteProperty,
+export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const [state, dispatch] = useReducer(reducer, initialState);
 
-        // exported new method
+    // load once
+    useEffect(() => {
+        let mounted = true;
+        (async () => {
+            try {
+                console.log("🔍 DataProvider: Attempting to load data...");
+                const raw = await AsyncStorage.getItem(STORAGE_KEY);
+
+                if (!raw) {
+                    console.log("DataProvider: No stored data found");
+                    if (mounted) dispatch({ type: "SET_LOADED" });
+                    return;
+                }
+
+                const parsed = JSON.parse(raw);
+                console.log("🔍 DataProvider: Raw data parsed, starting deserialization");
+                const deserialized = deserializeFromStorage(parsed);
+
+                if (mounted) {
+                    dispatch({ type: "SET_ALL", payload: deserialized });
+                    console.log("✅ DataProvider: Data loaded successfully", {
+                        services: deserialized.services.length,
+                        news: deserialized.news.length,
+                    });
+                }
+            } catch (err) {
+                console.error("❌ DataProvider: Failed to load stored data", err);
+                // Consider a retry mechanism or setting default state here
+            } finally {
+                if (mounted) dispatch({ type: "SET_LOADED" });
+            }
+        })();
+
+        return () => { mounted = false; };
+    }, []);
+
+    const saveInitialData = useCallback(async (payload: Partial<State>) => {
+        try {
+            console.log("🟦 [1] saveInitialData called");
+
+            const merged: State = {
+                services: payload.services ?? [],
+                news: payload.news ?? [],
+                advertisements: payload.advertisements ?? [],
+                properties: payload.properties ?? [],
+                isLoaded: true,
+            };
+            console.log("🟦 [2] State constructed");
+
+            // Update in-memory state immediately
+            dispatch({ type: "SET_ALL", payload: merged });
+            console.log("🟦 [3] Dispatched to in-memory state");
+
+            // Use the serializer for storage
+            const serialized = serializeForStorage(merged);
+            console.log("🟦 [4] Data serialized");
+
+            // Save to AsyncStorage
+            await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(serialized));
+            console.log("✅ [5] Data successfully saved to AsyncStorage");
+
+        } catch (err) {
+            console.error("❌ [6] saveInitialData failed", err);
+        }
+    }, []);
+
+
+
+    const resetData = useCallback(async () => {
+        try {
+            await AsyncStorage.removeItem(STORAGE_KEY);
+            dispatch({ type: "RESET" });
+            console.log("DataProvider: storage cleared");
+        } catch (err) {
+            console.error("DataProvider: reset failed", err);
+        }
+    }, []);
+
+    const value: ContextValue = {
+        services: state.services,
+        news: state.news,
+        advertisements: state.advertisements,
+        properties: state.properties,
+        isLoaded: state.isLoaded,
         saveInitialData,
+        resetData,
     };
 
     return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
+};
+
+/* ---------------------------
+   Hooks for consumer usage
+   --------------------------- */
+
+export const useData = (): ContextValue => {
+    const ctx = useContext(DataContext);
+    if (!ctx) throw new Error("useData must be used within DataProvider");
+    return ctx;
 };

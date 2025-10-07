@@ -8,4 +8,5 @@ export const FIREBASE_DOCS = {
     NEWS: "news",
     FRIDAY_BUSES: "friday_buses",
     PROPERTIES: "properties",
+    RATINGS: "ratings"
 }

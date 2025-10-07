@@ -23,7 +23,7 @@ export default function NotificationWrapper() {
         queryFn: getAllNotifications,
     }
     );
-    if (isLoading) return <Spinner />;
+    if (isLoading || !notifications) return <Spinner />;
     if (error) return <ErrorFallback />;
 
     const sortedNotifications = notifications.map((n) => ({

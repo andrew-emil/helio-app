@@ -1,11 +1,16 @@
 import EmptyState from "@/components/emptyState";
-import ServiceCard from "@/components/favorites/servicesCard";
+import ErrorFallback from "@/components/errorFallback";
 import PageBanner from "@/components/pageBanner";
+import ServiceCard from "@/components/service/servicesCard";
+import Spinner from "@/components/spinner";
 import { FONTS_CONSTANTS } from "@/constants/fontsConstants";
-import { useData } from "@/context/dataContext";
 import { useTheme } from "@/context/themeContext";
 import { useUser } from "@/context/userContext";
+import { useFavorites } from "@/hooks/useFavorites";
+import { FavStorage } from "@/services/storage/favoriteStorage";
+import { ServiceDocData } from "@/types/firebaseDocs.type";
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useQuery } from "@tanstack/react-query";
 import { Link, Redirect } from "expo-router";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -13,12 +18,23 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function Favourites() {
     const { isGuest, isLoggedIn } = useUser()
     const { colors } = useTheme();
-    const { services } = useData()
-    const favoriteServices = services.filter(s => s.isFavorite);
+    const { loading } = useFavorites()
 
-    if (isGuest || !isLoggedIn) {
+    const { data: favorites, error, isLoading } = useQuery<ServiceDocData[]>({
+        queryKey: ['favs'],
+        queryFn: async () => {
+            const favs = await FavStorage.getFavorites()
+            return favs
+        }
+    })
+
+    if (isGuest || !isLoggedIn)
         return <Redirect href="/(auth)/login" />
-    }
+
+    if (isLoading || loading || !favorites) return <Spinner />
+
+    if (error) return <ErrorFallback />
+
 
     return (
         <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}
@@ -30,9 +46,9 @@ export default function Favourites() {
                     icon={<Ionicons name="heart" size={48} color={colors.error} />}
                 />
                 <View className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                    {favoriteServices.length > 0 ? (
-                        <View className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                            {favoriteServices.map(service => (
+                    {favorites.length > 0 ? (
+                        <View className="flex-1 flex-col justify-center items-center gap-6">
+                            {favorites.map(service => (
                                 <ServiceCard key={service.id} service={service} />
                             ))}
                         </View>

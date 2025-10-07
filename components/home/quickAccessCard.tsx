@@ -1,3 +1,5 @@
+import { FONTS_CONSTANTS } from "@/constants/fontsConstants";
+import { useTheme } from "@/context/themeContext";
 import { useRouter } from "expo-router"; // or useNavigation if using react-navigation
 import React from "react";
 import { Pressable, Text, View } from "react-native";
@@ -10,19 +12,24 @@ type QuickAccessCardProps = {
 
 const QuickAccessCard: React.FC<QuickAccessCardProps> = ({ icon, title, to }) => {
     const router = useRouter();
+    const { colors, themeMode } = useTheme()
 
     return (
         <Pressable
             onPress={() => router.push(to as any)}
-            className="flex flex-col items-center justify-center p-4 bg-white dark:bg-slate-800 rounded-xl shadow-lg text-center w-40"
-            style={({ pressed }) => [
-                { transform: [{ scale: pressed ? 0.95 : 1 }] }, // mimic hover scale
-            ]}
+            className="flex flex-col items-center justify-center p-4 rounded-xl shadow-lg text-center w-40"
+            style={{
+                backgroundColor: colors.surface
+            }
+            }
         >
-            <View className="flex items-center justify-center w-14 h-14 bg-cyan-100 dark:bg-cyan-900/50 rounded-full mb-3">
+            <View className="flex items-center justify-center w-14 h-14 rounded-full mb-3"
+                style={{ backgroundColor: themeMode === 'light' ? "#cffafe" : 'rgb(22 78 99 / 0.5)' }}>
                 {icon}
             </View>
-            <Text className="text-base font-bold text-gray-800 dark:text-white">
+            <Text className="text-sm"
+                style={{ fontFamily: FONTS_CONSTANTS.bold, color: colors.text }}
+            >
                 {title}
             </Text>
         </Pressable>

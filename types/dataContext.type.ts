@@ -193,39 +193,7 @@ export interface AboutCityPageContent {
     board: BoardMember[];
 }
 
-// ✅ Reviews
-export interface Review {
-    id: ID;
-    userId: ID;
-    username: string;
-    avatar: string;
-    rating: number;
-    comment: string;
-    date: TimestampString;
-    adminReply?: string;
-    helpfulCount?: number;
-}
 
-// ✅ Services
-export interface Service {
-    id: ID;
-    subCategoryId: ID;
-    name: string;
-    images: string[];
-    address: string;
-    phone: string[];
-    whatsapp: string[];
-    about: string;
-    rating: number;
-    reviews: Review[];
-    facebookUrl?: string;
-    instagramUrl?: string;
-    locationUrl?: string;
-    workingHours?: string;
-    isFavorite: boolean;
-    views: number;
-    creationDate: TimestampString;
-}
 
 export interface SubCategory {
     id: ID;

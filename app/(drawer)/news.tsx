@@ -33,9 +33,15 @@ export default function News() {
                     {sortedNews.length > 0 ? (
                         <FlatList
                             data={news}
-                            renderItem={({ item }) => <NewsCard newsItem={item} />}
+                            renderItem={({ item }) => (
+                                <View className='left-0 relative mt-4 min-w-full rounded'>
+                                    <NewsCard newsItem={item} />
+                                </View>
+                            )
+                            }
                             keyExtractor={(item) => item.id}
                             contentContainerStyle={{ gap: 16 }}
+                            scrollEnabled={false}
                         />
                     ) : (
                         <View

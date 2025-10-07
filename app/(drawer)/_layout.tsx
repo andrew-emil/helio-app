@@ -3,6 +3,7 @@ import { FONTS_CONSTANTS } from "@/constants/fontsConstants";
 import { useTheme } from "@/context/themeContext";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { DrawerToggleButton } from "@react-navigation/drawer";
 import { useRouter } from "expo-router";
 import { Drawer } from "expo-router/drawer";
 import { TouchableOpacity } from "react-native";
@@ -47,6 +48,7 @@ export default function AppLayout() {
                         height: 90,
                     },
                     headerTitleAlign: "center",
+                    headerLeft: () => <DrawerToggleButton tintColor={colors.text} />,
 
                     headerRight: () => <TouchableOpacity
                         className="flex mr-3"
@@ -66,6 +68,16 @@ export default function AppLayout() {
                     }}
                 />
 
+                <Drawer.Screen
+                    name="home"
+                    options={{
+                        title: "الرئيسية",
+                        drawerLabel: "الرئيسية",
+                        drawerIcon: ({ color, size }) => (
+                            <Ionicons name="home" size={size} color={color} />
+                        ),
+                    }}
+                />
 
                 <Drawer.Screen
                     name="favorites"
@@ -194,7 +206,7 @@ export default function AppLayout() {
                         </TouchableOpacity>
                     }}
                 />
-                
+
                 <Drawer.Screen
                     name="category/service/[serviceId]"
                     options={{
@@ -203,7 +215,7 @@ export default function AppLayout() {
                         headerShown: true,
                         headerRight: () => <TouchableOpacity
                             className="flex mr-3"
-                            onPress={() => router.push('/(drawer)/category/[categoryName]')}
+                            onPress={() => router.back()}
                         >
                             <Ionicons name='arrow-back' size={24} color={colors.text} />
                         </TouchableOpacity>

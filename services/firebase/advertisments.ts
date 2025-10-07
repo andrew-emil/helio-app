@@ -14,7 +14,7 @@ export const getAdvertisementById = async (id: string): Promise<AdvertisementsDo
 
 // Fetch all Advertisements
 export const getAllAdvertisements = async (): Promise<AdvertisementsDocData[]> => {
-    const ref = collection(db, FIREBASE_DOCS.NEWS).withConverter(createConverter<AdvertisementsDocData>());
+    const ref = collection(db, FIREBASE_DOCS.ADVERTISMENTS).withConverter(createConverter<AdvertisementsDocData>());
     const snapshot = await getDocs(ref);
     return snapshot.docs.map((doc) => doc.data());
 };

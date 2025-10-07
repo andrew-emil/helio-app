@@ -21,14 +21,18 @@ export interface ServiceDocData {
     category: string;
     createdAt: Date;
     description: string;
-    externalLink?: string;
-    imageUrl: string;
+    facebookLink?: string;
+    integramLink?: string;
+    imageUrl: string[];
     name: string;
     phone: string;
     secondPhone?: string
     subCategory: string;
     whatsapp: string;
     workTime?: string
+
+    avgRating?: number;
+    ratingCount?: number;
 }
 
 export interface AdvertisementsDocData {
@@ -45,4 +49,14 @@ export interface PropertyDocData {
     description: string;
     phone: string;
     type: 'sale' | "rent"
+}
+
+export interface RatingDocData {
+    id?: string;
+    userId: string;       // ID of the user who rated
+    userName: string;     // display name (optional)
+    rating: number;       // e.g. 4.5
+    avatar?: string;
+    comment?: string;     // user's comment (optional)
+    createdAt: Date;      // timestamp
 }
