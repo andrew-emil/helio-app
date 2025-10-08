@@ -6,20 +6,15 @@ const ICON_SIZE = 28;
 
 export function getQuickAccessItemsFromServices(services: ServiceDocData[]) {
     const baseItems = [
-        { title: "الطعام والشراب", icon: <Ionicons name="fast-food" size={ICON_SIZE} color={ICON_COLOR} />, categoryName: "الطعام والشراب" },
-        { title: "الصحة", icon: <FontAwesome5 name="heartbeat" size={ICON_SIZE} color={ICON_COLOR} />, categoryName: "الصحة" },
-        { title: "التسوق", icon: <MaterialCommunityIcons name="shopping" size={ICON_SIZE} color={ICON_COLOR} />, categoryName: "التسوق" },
-        { title: "الصيانة", icon: <MaterialCommunityIcons name="wrench" size={ICON_SIZE} color={ICON_COLOR} />, categoryName: "الصيانه والخدمات المنزلية" },
+        { title: "الطعام والشراب", icon: <Ionicons name="fast-food" size={ICON_SIZE} color={ICON_COLOR} />, categoryName: "الطعام والشراب", to: "food" },
+        { title: "الصحة", icon: <FontAwesome5 name="heartbeat" size={ICON_SIZE} color={ICON_COLOR} />, categoryName: "الصحة", to: "health" },
+        { title: "التسوق", icon: <MaterialCommunityIcons name="shopping" size={ICON_SIZE} color={ICON_COLOR} />, categoryName: "التسوق" , to: "shopping"},
+        { title: "الصيانة", icon: <MaterialCommunityIcons name="wrench" size={ICON_SIZE} color={ICON_COLOR} />, categoryName: "الصيانه والخدمات المنزلية", to: "home_services" },
     ];
 
     return baseItems.map(item => {
-
-        const matchedService = services.find(s => s.category === item.categoryName);
-
-        const firstSubCategory = matchedService?.subCategory;
         const to =
-            `/(drawer)/category/${encodeURIComponent(firstSubCategory as string)}`
-
+            `/(drawer)/category/${encodeURIComponent(item.to as string)}`
         return {
             ...item,
             to,

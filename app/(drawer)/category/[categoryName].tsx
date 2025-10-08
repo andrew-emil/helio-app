@@ -12,7 +12,7 @@ export default function ServiceCategoriesScreen() {
     const { categoryName } = useLocalSearchParams()
     const { services } = useData()
     const { colors } = useTheme()
-    const filteredServices = services.filter((s) => s.subCategory === categoryName)
+    const filteredServices = services.filter((s) => s.category === categoryName)
 
     return (
         <SafeAreaView className="animate-fade-in flex-1 w-full"
@@ -30,7 +30,7 @@ export default function ServiceCategoriesScreen() {
                     icon={<Ionicons name="briefcase" size={48} color="#06B6D4" />}
                 />
 
-                {filteredServices.length > 0 ? (
+                {filteredServices && filteredServices.length > 0 ? (
                     <View className="flex-1 flex-col justify-center items-center gap-6">
                         {filteredServices.map(service => (
                             <ServiceCard key={service.id} service={service} />
