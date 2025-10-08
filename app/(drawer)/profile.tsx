@@ -22,8 +22,8 @@ export default function Profile() {
 
     // Custom hooks
     const { loading: profileLoading, updateProfile } = useProfile();
-    const { pickedImageUri, uploadImageToServer, clearPickedImage } = useImagePicker();
     const { isDeleting, confirmDeleteAccount } = useUserAccount();
+    const { pickedImageUri, uploadImageToServer, clearPickedImage } = useImagePicker();
 
     // Local state
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);

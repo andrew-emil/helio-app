@@ -10,4 +10,5 @@ export const FIREBASE_DOCS = {
     PROPERTIES: "properties",
     RATINGS: "ratings",
     EMERGENCIES: "emergencies",
+    MARKET: "market"
 }

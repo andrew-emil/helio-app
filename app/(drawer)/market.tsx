@@ -1,9 +1,214 @@
-import { Text, View } from "react-native";
+import { Entypo, Feather, FontAwesome } from "@expo/vector-icons";
+import { QueryClient, useQuery } from "@tanstack/react-query";
+import React, { useState } from "react";
+import {
+    FlatList,
+    Modal,
+    Pressable,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function Market() {
+import EmptyState from "@/components/emptyState";
+import ErrorFallback from "@/components/errorFallback";
+import AddItemForm from "@/components/market/addItemForm";
+import { MarketplaceItemCard } from "@/components/market/marketCardItem";
+import PageBanner from "@/components/pageBanner";
+import Spinner from "@/components/spinner";
+
+import { FONTS_CONSTANTS } from "@/constants/fontsConstants";
+import { useTheme } from "@/context/themeContext";
+import { useUser } from "@/context/userContext";
+import { getAllItems } from "@/services/firebase/market";
+import Toast from "react-native-toast-message";
+
+
+export default function Marketplace() {
+    const { colors } = useTheme();
+    const { isLoggedIn, isGuest } = useUser()
+    const [searchTerm, setSearchTerm] = useState("");
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const queryClient = new QueryClient()
+
+    const {
+        data: items,
+        isLoading,
+        error,
+    } = useQuery({
+        queryKey: ["market"],
+        queryFn: async () => await getAllItems(),
+    });
+
+    if (isLoading) return <Spinner />;
+    if (error) return <ErrorFallback />;
+
+    const filteredItems = items?.filter(
+        (item: any) =>
+            item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            item.category.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const handleOpenModal = () => {
+        if (!isLoggedIn || isGuest) {
+            Toast.show({
+                type: 'error',
+                text1: "سجل دخولك اولآ لتضع اعلانك"
+            })
+            return
+        } else {
+            setIsModalOpen(true)
+        }
+    }
+
     return (
-        <View>
-            <Text>Market</Text>
-        </View>
-    )
+        <SafeAreaView
+            className="flex-1"
+            style={{ backgroundColor: colors.background }}
+        >
+            <FlatList
+                data={filteredItems}
+                keyExtractor={(item, index) => item.id ?? `${index}`}
+                ListHeaderComponent={
+                    <View className="px-4 py-6">
+                        <PageBanner
+                            title="البيع والشراء"
+                            subtitle="تصفح إعلانات البيع من جيرانك في المدينة."
+                            icon={
+                                <FontAwesome
+                                    name="shopping-bag"
+                                    size={40}
+                                    color="#F59E0B"
+                                />
+                            }
+                        />
+
+                        {/* 🔍 Search & Add Button */}
+                        <View
+                            className="flex flex-col sm:flex-row gap-3 mt-6 p-4 rounded-2xl shadow-md"
+                            style={{ backgroundColor: colors.surface }}
+                        >
+                            <View className="relative flex-1">
+                                <Feather
+                                    name="search"
+                                    size={18}
+                                    color={colors.muted}
+                                    style={{
+                                        position: "absolute",
+                                        right: 12,
+                                        top: 14,
+                                    }}
+                                />
+                                <TextInput
+                                    placeholder="ابحث عن منتج أو فئة..."
+                                    placeholderTextColor={colors.muted}
+                                    value={searchTerm}
+                                    onChangeText={setSearchTerm}
+                                    style={{
+                                        backgroundColor: colors.headerColor,
+                                        borderRadius: 10,
+                                        paddingRight: 36,
+                                        paddingLeft: 12,
+                                        paddingVertical: 10,
+                                        color: colors.text,
+                                        fontFamily: FONTS_CONSTANTS.regular,
+                                    }}
+                                />
+                            </View>
+
+                            <TouchableOpacity
+                                onPress={handleOpenModal}
+                                className="flex-row items-center justify-center gap-2 rounded-lg py-3 px-4"
+                                style={{ backgroundColor: colors.primary }}
+                            >
+                                <Entypo name="plus" size={18} color="#fff" />
+                                <Text
+                                    style={{
+                                        color: "#fff",
+                                        fontFamily: FONTS_CONSTANTS.semiBold,
+                                        fontSize: 14,
+                                    }}
+                                >
+                                    أضف إعلانك
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                }
+                renderItem={({ item }) => (
+                    <View
+                        className="m-3 rounded-xl shadow-lg overflow-hidden w-full"
+                        style={{ backgroundColor: colors.surface }}
+                    >
+                        <MarketplaceItemCard item={item} />
+                    </View>
+                )}
+                ListEmptyComponent={
+                    <EmptyState
+                        icon={
+                            <FontAwesome
+                                name="shopping-bag"
+                                size={22}
+                                color={colors.muted}
+                            />
+                        }
+                        title="لا توجد إعلانات متاحة"
+                        message="كن أول من يضيف إعلان بيع في المدينة!"
+                    />
+                }
+                contentContainerStyle={{
+                    paddingBottom: 50,
+                }}
+            />
+            <Toast />
+
+            {/* 🧾 Modal for Add Item */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={isModalOpen}
+                onRequestClose={() => setIsModalOpen(false)}
+                style={{ width: "100%", height: "100%" }}
+            >
+                <ScrollView className="flex-1 bg-black/50"
+                    contentContainerClassName="justify-center items-center"
+                >
+                    <View
+                        className="w-11/12 rounded-2xl p-5"
+                        style={{ backgroundColor: colors.surface }}
+                    >
+                        <View className="flex-row justify-between items-center mb-4">
+                            <Text
+                                className="text-lg"
+                                style={{
+                                    fontFamily: FONTS_CONSTANTS.bold,
+                                    color: colors.text,
+                                }}
+                            >
+                                إضافة إعلان جديد
+                            </Text>
+                            <Pressable onPress={() => setIsModalOpen(false)}>
+                                <Entypo
+                                    name="cross"
+                                    size={24}
+                                    color={colors.text}
+                                />
+                            </Pressable>
+                        </View>
+
+                        <AddItemForm
+                            onClose={() => setIsModalOpen(false)}
+                            onSave={() => {
+                                setIsModalOpen(false);
+                                queryClient.invalidateQueries({ queryKey: ["market"] });
+                            }}
+                        />
+                    </View>
+                </ScrollView>
+            </Modal>
+        </SafeAreaView>
+    );
 }

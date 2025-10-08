@@ -77,3 +77,21 @@ export interface PropertyDocData {
     contactName: string;
     price: number
 }
+
+export type itemStatus = "approved" | "rejected" | "pending"
+export interface Market {
+    id?: string;
+    userId: string;
+    username: string;
+    avatar: string;
+    title: string;
+    description: string;
+    images: string[];
+    category: string;
+    price: number;
+    phone: string;
+    creationDate: Date
+    expirationDate: Date
+    status: itemStatus;
+    rejectionReason?: string
+}
