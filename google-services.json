@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1075496978111",
+    "firebase_url": "https://helio-89b78-default-rtdb.firebaseio.com",
+    "project_id": "helio-89b78",
+    "storage_bucket": "helio-89b78.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1075496978111:android:77cae2a581fe369e4b280a",
+        "android_client_info": {
+          "package_name": "com.andrewemil.helioapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1075496978111-gr5l3ehvr1eroiifahdmo7j1kj8n23gs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA7vZDwG9cWFF8IFpk2z79YGTUr8x4bkS8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1075496978111-gr5l3ehvr1eroiifahdmo7j1kj8n23gs.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1075496978111-7st9qqkus8deg04j9f0351q0im3b5ktg.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.andrewemil.helioapp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -79,6 +79,7 @@ export interface PropertyDocData {
 }
 
 export type itemStatus = "approved" | "rejected" | "pending"
+
 export interface Market {
     id?: string;
     userId: string;
@@ -94,4 +95,23 @@ export interface Market {
     expirationDate: Date
     status: itemStatus;
     rejectionReason?: string
+}
+
+type jobType = 'دوام جزئي' | 'دوام كامل' | "عقد" | "تدريب"
+
+export interface JobDocData {
+    id?: number
+    userId: number
+    username: string
+    avatar: string
+    title: string
+    companyName: string
+    description: string
+    location: string
+    type: jobType
+    contactInfo: string
+    status: itemStatus
+    rejectionReason?: string;
+    creationDate: Date
+    expirationDate: Date
 }
