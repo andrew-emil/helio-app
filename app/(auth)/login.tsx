@@ -47,9 +47,9 @@ export default function Login() {
                 </View>
 
                 {/* Google Button */}
-                <View className="w-full flex items-center mt-2 ">
+                {/* <View className="w-full flex items-center mt-2 ">
                     <GoogleLoginButton />
-                </View>
+                </View> */}
 
                 {/* Guest Login */}
                 <View className="w-full flex items-center mt-2">

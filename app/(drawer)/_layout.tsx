@@ -193,6 +193,21 @@ export default function AppLayout() {
                 />
 
                 <Drawer.Screen
+                    name="property/[propertyId]"
+                    options={{
+                        drawerLabelStyle: { display: 'none' },
+                        title: "العقارات",
+                        headerShown: true,
+                        headerRight: () => <TouchableOpacity
+                            className="flex mr-3"
+                            onPress={() => router.push('/(drawer)/tabs/realState')}
+                        >
+                            <Ionicons name='arrow-back' size={24} color={colors.text} />
+                        </TouchableOpacity>
+                    }}
+                />
+
+                <Drawer.Screen
                     name="category/[categoryName]"
                     options={{
                         drawerLabelStyle: { display: 'none' },

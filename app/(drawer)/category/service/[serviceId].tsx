@@ -1,7 +1,7 @@
 import { AddReviewForm } from "@/components/forms/addReviewForm";
-import { ImageSlider } from "@/components/service/imageSlider";
 import { RatingDisplay } from "@/components/service/ratingDisplay";
 import ShareButton from "@/components/shareButton";
+import SliderDetails from "@/components/sliderDetails";
 import Spinner from "@/components/spinner";
 import { FONTS_CONSTANTS } from "@/constants/fontsConstants";
 import { useData } from "@/context/dataContext";
@@ -11,6 +11,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import { getServiceRatings } from "@/services/firebase/reviews";
 import { FavStorage } from "@/services/storage/favoriteStorage";
 import { RatingDocData } from "@/types/firebaseDocs.type";
+import { normalizeImageUrls } from "@/utils/normalizeImageUrl";
 import { AntDesign, FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -63,10 +64,10 @@ export default function Service() {
     const { myFavorites } = data
     const isFavorite = myFavorites.find(f => f.id === serviceId)
 
-
     if (!service) {
         return <div className="flex items-center justify-center h-screen"><Spinner /> <p className="ml-4">جاري تحميل الخدمة...</p></div>;
     }
+    const images = normalizeImageUrls(service.imageUrl);
 
     return (
         <SafeAreaView className="animate-fade-in flex-1 w-full"
@@ -78,7 +79,12 @@ export default function Service() {
                     alignItems: "stretch",
                 }}
             >
-                <ImageSlider images={[...service?.imageUrl]} />
+                {/* Image Slider */}
+                {images.length > 0 && (
+                    <View style={{ paddingVertical: 4, paddingHorizontal: 12, height: 350 }}>
+                        <SliderDetails images={images} />
+                    </View>
+                )}
 
                 <View className="mt-4 flex-row justify-between items-start">
                     <View style={{ flex: 1 }}>

@@ -6,10 +6,11 @@ import { db } from "./firebase";
 
 
 // Fetch one property doc by id
-export const getPropertyById = async (id: string): Promise<PropertyDocData | undefined> => {
+export const getPropertyById = async (id: string): Promise<PropertyDocData | null> => {
     const ref = dbRefs.property(id);
     const snapshot = await getDoc(ref);
-    return snapshot.data()
+    console.log(snapshot.data())
+    return snapshot.data() ?? null
 };
 
 // Fetch all properties

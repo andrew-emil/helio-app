@@ -8,8 +8,6 @@ export const addRating = async (
     serviceId: string,
     ratingData: RatingDocData
 ) => {
-    console.log("Category:", categoryName, "Service:", serviceId);
-
     const ratingsRef = collection(db, FIREBASE_DOCS.SERVICES, categoryName, "items", serviceId, FIREBASE_DOCS.RATINGS);
     await addDoc(ratingsRef, ratingData);
 

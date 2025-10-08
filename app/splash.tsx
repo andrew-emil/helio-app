@@ -18,7 +18,7 @@ export default function App() {
   const { isGuest, isLoggedIn } = useUser();
   const appReady = useFontsLoader();
   const { colors } = useTheme();
-  const { data, isSuccess, isLoading, isError, error } = useSplashData();
+  const { data, isSuccess, isLoading, isError } = useSplashData();
   const { saveInitialData } = useData();
 
   // Your existing animation refs
@@ -57,6 +57,7 @@ export default function App() {
   };
 
   // Animate progress indicator
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const animateProgress = () => {
     Animated.parallel([
       Animated.timing(progressOpacity, {
@@ -78,7 +79,6 @@ export default function App() {
     if (isSuccess && data && !savedRef.current) {
       savedRef.current = true;
 
-      console.log('💾 Splash: Starting to save data to context...');
       (async () => {
         try {
           await saveInitialData({
@@ -87,7 +87,6 @@ export default function App() {
             advertisements: data.advertisements ?? [],
             properties: data.properties ?? [],
           });
-          console.log('✅ Splash: Data saved to context successfully');
           setDataSaved(true);
         } catch (saveError) {
           console.error('❌ Splash: Failed to save data to context', saveError);
@@ -102,7 +101,7 @@ export default function App() {
     const start = Date.now();
     while (!predicate()) {
       if (Date.now() - start > timeout) {
-        console.log('⏰ Splash: Wait timeout reached');
+
         return false;
       }
       await new Promise(res => setTimeout(res, interval));
@@ -114,17 +113,11 @@ export default function App() {
     let mounted = true;
 
     async function prepareAndHide() {
-      if (!appReady) {
-        console.log('⏳ Splash: App not ready yet');
-        return;
-      }
-
-      console.log('🎬 Splash: Starting animations and data loading');
+      if (!appReady) return
 
       // Start animations
       startPulsing();
       animateProgress();
-
       Animated.sequence([
         Animated.parallel([
           Animated.timing(logoPosition, {
@@ -164,22 +157,12 @@ export default function App() {
         Animated.delay(800),
       ]).start(async () => {
         if (!mounted) return;
-
-        console.log('⏳ Splash: Waiting for data to be saved...', {
-          isSuccess,
-          dataSaved,
-          hasData: !!data,
-          isLoading
-        });
-
         // Wait for data to be saved OR timeout after 10 seconds
         await waitFor(() => isSuccess && dataSaved, 10000, 200);
 
         if (!mounted) return;
 
         await SplashScreen.hideAsync();
-        console.log('🚀 Splash: Navigating to home page');
-
         // Navigate based on auth status
         if (isGuest || isLoggedIn) {
           router.replace('/(drawer)/tabs/home');
@@ -210,14 +193,6 @@ export default function App() {
     inputRange: [0, 100],
     outputRange: ['0%', '100%']
   });
-
-  // Show error state if data fetching failed
-  if (isError) {
-    console.log('❌ Splash: Data fetch error, proceeding anyway', error);
-    // Continue with navigation even if data fetch fails
-    // You might want to show a subtle error indicator
-  }
-
   return (
     <SafeAreaView style={{ backgroundColor: colors.background }}
       className="flex-1 justify-center items-center px-5"

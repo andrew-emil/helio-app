@@ -11,7 +11,8 @@ export interface ThemeColors {
     text: string;
     iconColor: string;
     muted: string;
-    error: string
+    error: string;
+    border: string;
 }
 
 export interface ThemeContextValue {

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "helio app",
+    "name": "Helio App",
     "slug": "helio-app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,8 +9,8 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "jsEngine": "hermes",
-
     "ios": {
+      "googleServicesFile": "./GoogleService-Info.plist",
       "supportsTablet": true,
       "bundleIdentifier": "com.andrewemil.helioapp",
       "icon": "./assets/images/icon2.png",
@@ -21,14 +21,18 @@
         "UIBackgroundModes": ["remote-notification"]
       }
     },
-
     "android": {
-      "permissions": ["CAMERA", "ACCESS_FINE_LOCATION", "RECORD_AUDIO",  "NOTIFICATIONS"],
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "RECORD_AUDIO",
+        "NOTIFICATIONS"
+      ],
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/icon2.png"
       },
-
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.andrewemil.helioapp"
@@ -39,10 +43,16 @@
     },
     "extra": {
       "supportsRTL": true,
-      "forcesRTL": true
+      "forcesRTL": true,
+      "router": {},
+      "eas": {
+        "projectId": "92ae9139-6389-4fbe-bc0b-cef6354c5c17"
+      },
+      "EXPO_PUBLIC_APP_URL": "https://helio.example.com"
     },
     "plugins": [
       "expo-router",
+      "@react-native-firebase/app",
       [
         "expo-notifications",
         {

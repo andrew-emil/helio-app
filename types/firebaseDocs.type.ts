@@ -37,19 +37,11 @@ export interface ServiceDocData {
 
 export interface AdvertisementsDocData {
     id: string;
-    createdAt: Date;
     imageUrl: string;
     title?: string;
+    createdAt: Date;
 }
 
-export interface PropertyDocData {
-    id: string;
-    createdAt: Date;
-    images: string[];
-    description: string;
-    phone: string;
-    type: 'sale' | "rent"
-}
 
 export interface RatingDocData {
     id?: string;
@@ -68,4 +60,20 @@ export interface EmerengyDocData {
     name: string;
     phone: string;
     type: emerencyType
+}
+
+export type propertyType = "rent" | "sale"
+
+export interface PropertyDocData {
+    id: string;
+    title: string;
+    createdAt: Date;
+    images: string[];
+    description: string;
+    phone: string;
+    type: propertyType
+    address: string;
+    amenities: string[] //وسائل الراحة
+    contactName: string;
+    price: number
 }

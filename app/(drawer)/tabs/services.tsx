@@ -71,8 +71,7 @@ export default function Services() {
                         }}
                         className="p-4 rounded-lg active:opacity-80"
                         onPress={() => {
-                            // keep behavior placeholder if needed
-                            console.log("Open emergency services");
+                            router.push('/(drawer)/tabs/emergency')
                         }}
                     >
                         <View>

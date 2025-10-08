@@ -30,5 +30,5 @@ export const dbRefs = {
             createConverter<ServiceDocData>()
         ),
     advertisment: (uid: string) => getTypedDocRef<AdvertisementsDocData>(FIREBASE_DOCS.ADVERTISMENTS, uid),
-    property: (uid: string) => getTypedDocRef<PropertyDocData>(FIREBASE_DOCS.ADVERTISMENTS, uid),
+    property: (uid: string) => getTypedDocRef<PropertyDocData>(FIREBASE_DOCS.PROPERTIES, uid),
 } as const;

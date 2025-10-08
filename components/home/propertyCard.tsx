@@ -1,12 +1,12 @@
 import { FONTS_CONSTANTS } from "@/constants/fontsConstants";
 import { useTheme } from "@/context/themeContext";
 import { PropertyDocData } from "@/types/firebaseDocs.type";
-import { useNavigation } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 import React from "react";
 import { Image, Linking, Text, TouchableOpacity, View } from "react-native";
 
 const PropertyCard: React.FC<{ property: PropertyDocData }> = ({ property }) => {
-    const navigation = useNavigation();
+    const router = useRouter()
     const { colors } = useTheme()
 
     return (
@@ -14,8 +14,7 @@ const PropertyCard: React.FC<{ property: PropertyDocData }> = ({ property }) => 
             activeOpacity={0.8}
             className="rounded-xl shadow-lg overflow-hidden mb-4"
             style={{ backgroundColor: colors.surface }}
-        //TODO: add the page
-        // onPress={() => navigation.navigate("PropertyDetails", { id: property.id })}
+            onPress={() => router.push(`/(drawer)/property/${property.id}`)}
         >
             {/* Image + Type Badge */}
             <View className="relative">
@@ -59,7 +58,7 @@ const PropertyCard: React.FC<{ property: PropertyDocData }> = ({ property }) => 
                             Linking.openURL(url);
                         }}
                     >
-                        <Text style={{ fontFamily: FONTS_CONSTANTS.bold, color:'#16a34a'}}
+                        <Text style={{ fontFamily: FONTS_CONSTANTS.bold, color: '#16a34a' }}
                         >
                             {property.phone}
                         </Text>
