@@ -97,11 +97,11 @@ export interface Market {
     rejectionReason?: string
 }
 
-type jobType = 'دوام جزئي' | 'دوام كامل' | "عقد" | "تدريب"
+export type jobType = 'دوام جزئي' | 'دوام كامل' | "عقد" | "تدريب"
 
 export interface JobDocData {
-    id?: number
-    userId: number
+    id?: string
+    userId: string
     username: string
     avatar: string
     title: string

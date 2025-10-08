@@ -1,5 +1,5 @@
 import { Entypo, Feather, FontAwesome } from "@expo/vector-icons";
-import { QueryClient, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
 import {
     FlatList,
@@ -32,7 +32,6 @@ export default function Marketplace() {
     const { isLoggedIn, isGuest } = useUser()
     const [searchTerm, setSearchTerm] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const queryClient = new QueryClient()
 
     const {
         data: items,
@@ -203,7 +202,6 @@ export default function Marketplace() {
                             onClose={() => setIsModalOpen(false)}
                             onSave={() => {
                                 setIsModalOpen(false);
-                                queryClient.invalidateQueries({ queryKey: ["market"] });
                             }}
                         />
                     </View>

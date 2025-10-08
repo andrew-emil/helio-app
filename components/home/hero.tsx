@@ -1,4 +1,3 @@
-/* same imports as before */
 import { FONTS_CONSTANTS } from "@/constants/fontsConstants";
 import { useTheme } from "@/context/themeContext";
 import { ServiceDocData } from "@/types/firebaseDocs.type";
@@ -76,12 +75,11 @@ export default function HeroSection({
 
     //TODO: fix the search
     const handleSelect = (service: ServiceDocData) => {
-        // navigate only when the user taps a suggestion
         console.log(service)
         setQuery(service.name);
         setShowSuggestions(false);
         inputRef.current?.blur();
-        router.push(`/(drawer)/category/${encodeURIComponent(service.category)}`);
+        router.push(`/(drawer)/category/${service.category}`);
     };
 
     // <-- CHANGED: do NOT navigate on submit; just keep suggestions visible

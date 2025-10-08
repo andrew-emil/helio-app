@@ -1,12 +1,12 @@
 // context/dataContext.tsx
-import React, { createContext, useContext, useReducer, useEffect, useCallback } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import type {
-    ServiceDocData,
-    NewsDocData,
     AdvertisementsDocData,
+    NewsDocData,
     PropertyDocData,
+    ServiceDocData,
 } from "@/types/firebaseDocs.type";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { createContext, useCallback, useContext, useEffect, useReducer } from "react";
 
 const STORAGE_KEY = "appData_v1";
 
@@ -110,29 +110,24 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         let mounted = true;
         (async () => {
             try {
-                console.log("🔍 DataProvider: Attempting to load data...");
+
                 const raw = await AsyncStorage.getItem(STORAGE_KEY);
 
                 if (!raw) {
-                    console.log("DataProvider: No stored data found");
+
                     if (mounted) dispatch({ type: "SET_LOADED" });
                     return;
                 }
 
                 const parsed = JSON.parse(raw);
-                console.log("🔍 DataProvider: Raw data parsed, starting deserialization");
+
                 const deserialized = deserializeFromStorage(parsed);
 
                 if (mounted) {
                     dispatch({ type: "SET_ALL", payload: deserialized });
-                    console.log("✅ DataProvider: Data loaded successfully", {
-                        services: deserialized.services.length,
-                        news: deserialized.news.length,
-                    });
                 }
             } catch (err) {
-                console.error("❌ DataProvider: Failed to load stored data", err);
-                // Consider a retry mechanism or setting default state here
+                console.log(err)
             } finally {
                 if (mounted) dispatch({ type: "SET_LOADED" });
             }
@@ -142,45 +137,26 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
     const saveInitialData = useCallback(async (payload: Partial<State>) => {
-        try {
-            console.log("🟦 [1] saveInitialData called");
+        const merged: State = {
+            services: payload.services ?? [],
+            news: payload.news ?? [],
+            advertisements: payload.advertisements ?? [],
+            properties: payload.properties ?? [],
+            isLoaded: true,
+        };
 
-            const merged: State = {
-                services: payload.services ?? [],
-                news: payload.news ?? [],
-                advertisements: payload.advertisements ?? [],
-                properties: payload.properties ?? [],
-                isLoaded: true,
-            };
-            console.log("🟦 [2] State constructed");
-
-            // Update in-memory state immediately
-            dispatch({ type: "SET_ALL", payload: merged });
-            console.log("🟦 [3] Dispatched to in-memory state");
-
-            // Use the serializer for storage
-            const serialized = serializeForStorage(merged);
-            console.log("🟦 [4] Data serialized");
-
-            // Save to AsyncStorage
-            await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(serialized));
-            console.log("✅ [5] Data successfully saved to AsyncStorage");
-
-        } catch (err) {
-            console.error("❌ [6] saveInitialData failed", err);
-        }
+        dispatch({ type: "SET_ALL", payload: merged });
+        // Use the serializer for storage
+        const serialized = serializeForStorage(merged);
+        // Save to AsyncStorage
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(serialized))
     }, []);
 
 
 
     const resetData = useCallback(async () => {
-        try {
-            await AsyncStorage.removeItem(STORAGE_KEY);
-            dispatch({ type: "RESET" });
-            console.log("DataProvider: storage cleared");
-        } catch (err) {
-            console.error("DataProvider: reset failed", err);
-        }
+        await AsyncStorage.removeItem(STORAGE_KEY);
+        dispatch({ type: "RESET" });
     }, []);
 
     const value: ContextValue = {

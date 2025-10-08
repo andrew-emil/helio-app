@@ -27,7 +27,6 @@ export type SplashPayload = {
 
 export function useSplashData() {
     const selectFn = useCallback((data: RawPayload): SplashPayload => {
-        console.log('🔄 useSplashData: Starting to transform data...');
 
         const flatServices: ServiceDocData[] = [];
 
@@ -50,14 +49,6 @@ export function useSplashData() {
             advertisements: data.advertisements ?? [],
             properties: data.properties ?? [],
         };
-
-        console.log('✅ useSplashData: Data transformation completed', {
-            services: result.services.length,
-            news: result.news.length,
-            advertisements: result.advertisements.length,
-            properties: result.properties.length,
-        });
-
         return result;
     }, []);
 
@@ -72,14 +63,6 @@ export function useSplashData() {
                     getAllAdvertisements(),
                     getAllProperties(),
                 ]);
-
-                console.log('✅ useSplashData: Firebase data fetched successfully', {
-                    services: services?.length || 0,
-                    news: news?.length || 0,
-                    advertisements: advertisements?.length || 0,
-                    properties: properties?.length || 0,
-                });
-
                 return {
                     services: services || [],
                     news: news || [],

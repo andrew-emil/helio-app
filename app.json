@@ -51,8 +51,13 @@
       "EXPO_PUBLIC_APP_URL": "https://helio.example.com"
     },
     "plugins": [
-      "expo-router",
       "@react-native-firebase/app",
+      [
+        "expo-router",
+        {
+          "sitemap": true
+        }
+      ],
       [
         "expo-notifications",
         {
