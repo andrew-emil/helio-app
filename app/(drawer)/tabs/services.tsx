@@ -2,7 +2,7 @@ import PageBanner from "@/components/pageBanner";
 import { FONTS_CONSTANTS } from "@/constants/fontsConstants";
 import { useTheme } from "@/context/themeContext";
 import { useFormattedServices } from "@/hooks/useServiceFormatter";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -138,17 +138,11 @@ export default function Services() {
                                         </View>
 
                                         {/* Simple text indicator (no icon library) */}
-                                        <View style={{ marginLeft: 12 }}>
-                                            <Text
-                                                style={{
-                                                    fontFamily: FONTS_CONSTANTS.bold,
-                                                    color: colors.primary,
-                                                    fontSize: 18,
-                                                }}
-                                            >
-                                                {isOpen ? "▲" : "▼"}
-                                            </Text>
-                                        </View>
+                                        <MaterialIcons
+                                            name={isOpen ? "keyboard-arrow-up" : "keyboard-arrow-down"}
+                                            size={22}
+                                            color="#008080"
+                                        />
                                     </TouchableOpacity>
 
                                     {/* Subcategories (conditionally rendered to allow LayoutAnimation) */}
