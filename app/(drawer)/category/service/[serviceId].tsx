@@ -306,7 +306,9 @@ export default function Service() {
                         </TouchableOpacity>
                     </View>
                 )}
-                <Toast />
+                <Toast config={{
+                    
+                }}/>
             </ScrollView>
         </SafeAreaView >
     )

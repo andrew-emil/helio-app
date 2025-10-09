@@ -85,13 +85,8 @@ const ServiceCard: React.FC<Props> = ({ service, onRate }) => {
         }
         if (onRate) onRate(service.id);
     };
-
-    const mainImageUrl = useMemo(() => {
-        const url = service.imageUrl;
-        if (!url || !Array.isArray(url) || url.length === 0) return undefined;
-        return url[0];
-    }, [service.imageUrl]);
     const avg = service.avgRating ?? 0;
+
 
     return (
         <View className="relative w-full px-3 mt-3">
@@ -103,15 +98,13 @@ const ServiceCard: React.FC<Props> = ({ service, onRate }) => {
             >
                 <View className="relative">
                     <Image
-                        source={{ uri: mainImageUrl }}
+                        source={{ uri: service.imageUrl }}
                         style={{
                             width: '100%',
                             height: 192,
                             resizeMode: 'cover',
-                            backgroundColor: colors.background,
-                            opacity: 0.9
+                            opacity: 0.8
                         }}
-                        // width={"100%"}
                         height={192}
                     />
 
@@ -140,9 +133,9 @@ const ServiceCard: React.FC<Props> = ({ service, onRate }) => {
                         {service.address}
                     </Text>
 
-                    <View className="flex-row items-center mt-2 space-x-3">
+                    <View className="flex-col items-start mt-2 space-x-3 gap-1">
                         {service.phone ? (
-                            <View className="flex-row items-center space-x-1">
+                            <View className="flex-row items-center space-x-1 gap-2">
                                 <Ionicons name="call" size={14} color={colors.iconColor} />
                                 <Text className="text-xs" style={{ fontFamily: FONTS_CONSTANTS.regular, color: colors.muted }}>
                                     {service.phone}
@@ -151,7 +144,7 @@ const ServiceCard: React.FC<Props> = ({ service, onRate }) => {
                         ) : null}
 
                         {service.workTime ? (
-                            <View className="flex-row items-center space-x-1">
+                            <View className="flex-row items-center space-x-1 gap-2">
                                 <Ionicons name="time" size={14} color={colors.iconColor} />
                                 <Text className="text-xs" style={{ fontFamily: FONTS_CONSTANTS.regular, color: colors.muted }}>
                                     {service.workTime}

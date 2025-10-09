@@ -1,5 +1,4 @@
 export interface Review {
-    id: string;
     serviceName: string;
     rating: number;
     comment: string;

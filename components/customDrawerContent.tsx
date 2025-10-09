@@ -99,7 +99,7 @@ function CustomDrawerContent(props: any) {
                                     }}
                                     onPress={() => {
                                         navigation.navigate(item.name);
-                                        navigation.closeDrawer(); // 👈 closes drawer after navigation
+                                        navigation.closeDrawer(); 
                                     }}
                                 />
                             );

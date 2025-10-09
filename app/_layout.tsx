@@ -7,12 +7,16 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { I18nManager } from "react-native";
 
 import "@/styles/globals.css";
 import "react-native-gesture-handler";
 import "react-native-reanimated";
 
 const queryClient = new QueryClient()
+
+I18nManager.allowRTL(true)
+I18nManager.forceRTL(true)
 
 
 // Notifications.setNotificationHandler({

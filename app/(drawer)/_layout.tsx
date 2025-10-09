@@ -136,7 +136,7 @@ export default function AppLayout() {
                 />
 
                 <Drawer.Screen
-                    name="buses"
+                    name="transportation"
                     options={{
                         drawerLabel: "المواصلات",
                         title: "المواصلات",
@@ -153,17 +153,6 @@ export default function AppLayout() {
                         title: "خدمات جهاز المدينة",
                         drawerIcon: () => (
                             <Ionicons name="documents-outline" size={22} color="#0EA5E9" />
-                        ),
-                    }}
-                />
-
-                <Drawer.Screen
-                    name="aboutCity"
-                    options={{
-                        drawerLabel: "عن المدينة و الشركة",
-                        title: "عن المدينة و الشركة",
-                        drawerIcon: () => (
-                            <FontAwesome6 name="building-columns" size={22} color="#22C55E" />
                         ),
                     }}
                 />

@@ -123,3 +123,32 @@ export interface CityAgencyDoc {
     stepsToApply: string[];
     requiredDocs: string[];
 }
+
+export interface BusesExternalDocData {
+    id: string;
+    routeName: string;
+    supervisorName: string;
+    supervisorPhone: string;
+    times: string[];
+    waitingLocation?: string;
+}
+
+interface Drvier {
+    phone: string;
+    name: string;
+}
+
+interface Days {
+    date: string
+    day: string
+    drivers: Drvier[]
+    driversCount: number
+}
+
+export interface BusesInternalDoc {
+    id: string;
+    supervisorName: string;
+    supervisorPhone: string;
+    days: Days[];
+    createdAt: Date;
+}

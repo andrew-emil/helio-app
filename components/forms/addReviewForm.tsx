@@ -50,7 +50,7 @@ export const AddReviewForm: React.FC<{
             };
             await Promise.all([
                 addRating(categoryName, serviceId, payload),
-                queryClient.invalidateQueries({ queryKey: ["reviews"] }),
+                queryClient.invalidateQueries({ queryKey: ['reviews', 'favs'] }),
                 RatingsStorage.addRating({
                     serviceName,
                     rating,
@@ -65,7 +65,6 @@ export const AddReviewForm: React.FC<{
                 text1: "تم إضافة تقييمك بنجاح",
                 text1Style: {
                     fontFamily: FONTS_CONSTANTS.semiBold,
-                    color: "#FFF",
                 },
             });
         } catch (err) {

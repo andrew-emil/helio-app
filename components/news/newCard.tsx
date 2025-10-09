@@ -26,9 +26,9 @@ const NewsCard: React.FC<{ newsItem: NewsDocData }> = ({ newsItem }) => {
         >
             <Image
                 source={{ uri: newsItem.imageUrl }}
-                className="rounded-lg w-full h-40"
-                style={{ aspectRatio: 16 / 9, width: '100%' }} // ensure image fills the card width
-                resizeMode="cover"
+                className="rounded-lg w-full"
+                style={{ aspectRatio: 16 / 9, width: '100%' }}
+                resizeMode="stretch"
             />
 
             <View className="p-4">
