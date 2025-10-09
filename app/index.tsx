@@ -195,7 +195,7 @@ export default function App() {
   });
   return (
     <SafeAreaView style={{ backgroundColor: colors.background }}
-      className="flex-1 justify-center items-center px-5"
+      className="flex-1 justify-center items-center px-3 w-full"
     >
       <Animated.View style={
         {
@@ -214,7 +214,7 @@ export default function App() {
           className="w-52 h-52 rounded-2xl"
         />
       </Animated.View>
-      <View className="h-6" />
+      <View className="h-4" />
       <Animated.View style={{ opacity: textOpacity, transform: [{ translateY: textOffset }] }}>
         <GradientText
           colors={['#27d0ee', '#BE85FC']}

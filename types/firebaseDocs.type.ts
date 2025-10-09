@@ -152,3 +152,35 @@ export interface BusesInternalDoc {
     days: Days[];
     createdAt: Date;
 }
+
+export type Category = 'نقاش عام' | 'نقاش خاص' | 'سؤال' | 'استطلاع رأي' | 'حدث'
+
+interface Comments {
+    id: string;
+    userId: string;
+    username: string;
+    avatar: string;
+    content: string;
+    createdAt: Date;
+}
+
+export interface Poll {
+    option: string;
+    vote: string[]
+}
+
+export interface PostDocData {
+    id?: string;
+    userId: string;
+    username: string;
+    avatar: string;
+    title: string;
+    content: string;
+    category: Category;
+    likes: string[]
+    comments: Comments[];
+    isPinned: boolean;
+    pollOptions: Poll[];
+    targetAudience?: string; // For 'نقاش خاص'
+    createdAt: Date;
+}

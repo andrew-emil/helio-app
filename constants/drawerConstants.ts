@@ -20,7 +20,6 @@ export const drawerSections = [
     [
         { name: "transportation", label: "المواصلات", icon: () => React.createElement(FontAwesome6, { name: "truck", size: 22, color: "#5F4892" }) },
         { name: "cityAgencyServices", label: "خدمات جهاز المدينة", icon: () => React.createElement(Ionicons, { name: "documents-outline", size: 22, color: "#0EA5E9" }) },
-        { name: "aboutCity", label: "عن المدينة و الشركة", icon: () => React.createElement(FontAwesome6, { name: "building-columns", size: 22, color: "#22C55E" }) }, // Fixed: "AboutCity" → "aboutCity"
     ],
     // SEPARATOR 3
     // Third section - Information

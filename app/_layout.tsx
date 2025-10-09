@@ -1,4 +1,4 @@
-import { CommunityProvider } from "@/context/communityContext";
+
 import { DataProvider } from "@/context/dataContext";
 import { ThemeProvider, useTheme } from "@/context/themeContext";
 import { ToastProvider } from "@/context/toastContext";
@@ -6,8 +6,8 @@ import { UserProvider } from "@/context/userContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { SafeAreaProvider } from "react-native-safe-area-context";
 import { I18nManager } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import "@/styles/globals.css";
 import "react-native-gesture-handler";
@@ -130,11 +130,9 @@ export default function RootLayout() {
         <ToastProvider>
           <QueryClientProvider client={queryClient}>
             <UserProvider>
-              <CommunityProvider>
-                <DataProvider>
-                  <RootLayoutInner />
-                </DataProvider>
-              </CommunityProvider>
+              <DataProvider>
+                <RootLayoutInner />
+              </DataProvider>
             </UserProvider>
           </QueryClientProvider>
         </ToastProvider>
