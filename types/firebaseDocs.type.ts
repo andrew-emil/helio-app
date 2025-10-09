@@ -115,3 +115,11 @@ export interface JobDocData {
     creationDate: Date
     expirationDate: Date
 }
+
+
+export interface CityAgencyDoc {
+    id: string;
+    title: string;
+    stepsToApply: string[];
+    requiredDocs: string[];
+}

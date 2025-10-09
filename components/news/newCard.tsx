@@ -2,18 +2,20 @@ import { FONTS_CONSTANTS } from '@/constants/fontsConstants';
 import { useTheme } from '@/context/themeContext';
 import { useBg } from '@/hooks/useBg';
 import { NewsDocData } from '@/types/firebaseDocs.type';
-import { Link } from 'expo-router';
+import { useRouter } from 'expo-router';
 import React from 'react';
-import { Image, Text, View } from 'react-native';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
 
 const NewsCard: React.FC<{ newsItem: NewsDocData }> = ({ newsItem }) => {
     const { colors } = useTheme();
     const { bg } = useBg();
+    const router = useRouter();
 
     return (
         // give the card a max width and push it to the right
-        <Link
-            href={`/news/${newsItem.id}`}
+        <TouchableOpacity
+            onPress={() => router.push(`/news/${newsItem.id}`)}
+            activeOpacity={0.8}
             className="rounded-xl shadow-lg overflow-hidden transform transition-transform duration-300 relative text-right"
             // style merges after className/nativewind styles: alignSelf will push it right
             style={{
@@ -64,7 +66,7 @@ const NewsCard: React.FC<{ newsItem: NewsDocData }> = ({ newsItem }) => {
                     {newsItem.content}
                 </Text>
             </View>
-        </Link>
+        </TouchableOpacity>
     );
 };
 

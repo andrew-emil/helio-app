@@ -128,6 +128,9 @@ export default function HomeScreen() {
                     horizontal
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={{ paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 12 }}
+                    nestedScrollEnabled={false}
+                    scrollEnabled={true}
+                    keyboardShouldPersistTaps="handled"
                 >
                     {quickAccessItems.map((item) => (
                         <QuickAccessCard key={item.title} {...item} />
@@ -147,8 +150,17 @@ export default function HomeScreen() {
                 ListHeaderComponent={listHeader}
                 contentContainerStyle={{ paddingBottom: 40 }}
                 stickySectionHeadersEnabled={false}
+                // Fix scrolling and touch issues
+                scrollEnabled={true}
+                showsVerticalScrollIndicator={true}
+                keyboardShouldPersistTaps="handled"
+                removeClippedSubviews={false}
                 // tuning for nicer spacing between items
                 ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+                // Better performance
+                initialNumToRender={10}
+                maxToRenderPerBatch={5}
+                windowSize={10}
             />
         </SafeAreaView>
     );

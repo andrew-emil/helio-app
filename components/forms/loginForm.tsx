@@ -15,7 +15,7 @@ import CustomInputForm from "../customInputForm";
 
 
 export default function LoginForm() {
-    const { colors, themeMode } = useTheme();
+    const { colors } = useTheme();
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
     const { setUser } = useUser()
@@ -97,7 +97,7 @@ export default function LoginForm() {
             {errors.password && <CustomError message={errors.password.message!} />}
 
             {/* Forget Password */}
-            <TouchableOpacity
+            {/* <TouchableOpacity
                 onPress={() => router.push("/(auth)/forgetPassword")}
                 className="mb-4 mt-1 flex items-start bg-transparent border-none"
             >
@@ -108,7 +108,7 @@ export default function LoginForm() {
                 >
                     نسيت كلمة المرور؟
                 </Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
             {/* Login Button */}
             <TouchableOpacity
