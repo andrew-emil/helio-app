@@ -1,10 +1,15 @@
 import { FirebaseOptions } from 'firebase/app';
 
+const apiKey = process.env.EXPO_PUBLIC_API_KEY as string
+const appId = process.env.EXPO_PUBLIC_APP_ID as string
+const messagingSenderId = process.env.EXPO_PUBLIC_MESSAGING_SENDER_ID as string
+const authDomain = process.env.EXPO_PUBLIC_AUTH_DOMAIN as string
+
 export const firebaseConfig: FirebaseOptions = {
-    apiKey: "AIzaSyBHsG83udr5wZj3_ty0U2QgRHQuK8C3gU8",
-    appId: "1:1075496978111:android:77cae2a581fe369e4b280a",
-    messagingSenderId: "1075496978111",
+    apiKey,
+    appId,
+    messagingSenderId,
     projectId: "helio-89b78",
     storageBucket: "helio-89b78.appspot.com",
-    authDomain: "helio-89b78.firebaseapp.com",
+    authDomain,
 }

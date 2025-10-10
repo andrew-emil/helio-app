@@ -14,13 +14,17 @@ const redirectUri = AuthSession.makeRedirectUri({
     preferLocalhost: true
 });
 
+const webClientId = process.env.EXPO_PUBLIC_WEB_CLIENT_ID as string
+const androidClientId = process.env.EXPO_PUBLIC_ANDROID_ID as string
+const iosClientId = process.env.EXPO_PUBLIC_IOS_ID as string
+
 
 export default function GoogleLoginButton() {
     const { colors } = useTheme()
     const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-        webClientId: "620244432889-pb2v6t55per2vithg52udvaqljj5a8fv.apps.googleusercontent.com",
-        androidClientId: "620244432889-5qotrklh25qlqb7rgq6b6ca7dglh5reo.apps.googleusercontent.com",
-        iosClientId: "620244432889-5qotrklh25qlqb7rgq6b6ca7dglh5reo.apps.googleusercontent.com",
+        webClientId,
+        androidClientId,
+        iosClientId,
         redirectUri,
     }
 );
