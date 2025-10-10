@@ -2,7 +2,7 @@ import CustomDrawerContent from "@/components/customDrawerContent";
 import { FONTS_CONSTANTS } from "@/constants/fontsConstants";
 import { useTheme } from "@/context/themeContext";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
-import FontAwesome from '@expo/vector-icons/FontAwesome';
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { DrawerToggleButton } from "@react-navigation/drawer";
 import { useRouter } from "expo-router";
 import { Drawer } from "expo-router/drawer";
@@ -12,82 +12,55 @@ export default function AppLayout() {
     const { colors, themeMode } = useTheme();
     const router = useRouter();
 
-    // Screens hidden from drawer (display: none)
-    const hiddenScreens = [
-        "tabs",
-        "profile",
-        "news/[newsId]",
-        "post/[postId]",
-        "property/[propertyId]",
-        "category/[categoryName]",
-        "category/service/[serviceId]",
-        "category/sub-category/[subCategoryName]",
-        "notification"
-    ];
-
     return (
         <Drawer
             drawerContent={(props) => <CustomDrawerContent {...props} />}
-            screenOptions={({ route, navigation }) => {
-                const isHidden = hiddenScreens.includes(route.name);
+            screenOptions={{
+                drawerPosition: "right",
+                drawerStyle: { backgroundColor: colors.headerColor },
+                drawerLabelStyle: {
+                    color: colors.text,
+                    fontFamily: FONTS_CONSTANTS.medium,
+                },
+                drawerActiveTintColor: themeMode === "light" ? "#1d4ed8" : "#3b82f6",
+                drawerInactiveTintColor: colors.text,
+                headerTitleStyle: {
+                    fontSize: 20,
+                    fontFamily: FONTS_CONSTANTS.bold,
+                    color: colors.text,
+                    letterSpacing: 0.3,
+                },
+                headerTitleContainerStyle: { left: 0, right: 0 },
+                headerStyle: {
+                    backgroundColor: colors.headerColor,
+                    borderBottomColor: colors.surface,
+                    borderBottomWidth: 1,
+                    elevation: 0,
+                    shadowColor: colors.primary,
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.06,
+                    shadowRadius: 4,
+                    height: 90,
+                },
+                headerTitleAlign: "center",
 
-                return {
-                    drawerPosition: "right",
-                    drawerStyle: { backgroundColor: colors.headerColor },
-                    drawerLabelStyle: {
-                        color: colors.text,
-                        fontFamily: FONTS_CONSTANTS.medium,
-                    },
-                    drawerActiveTintColor: themeMode === "light" ? "#1d4ed8" : "#3b82f6",
-                    drawerInactiveTintColor: colors.text,
-                    headerTitleStyle: {
-                        fontSize: 20,
-                        fontFamily: FONTS_CONSTANTS.bold,
-                        color: colors.text,
-                        letterSpacing: 0.3,
-                    },
-                    headerTitleContainerStyle: { left: 0, right: 0 },
-                    headerStyle: {
-                        backgroundColor: colors.headerColor,
-                        borderBottomColor: colors.surface,
-                        borderBottomWidth: 1,
-                        elevation: 0,
-                        shadowColor: colors.primary,
-                        shadowOffset: { width: 0, height: 1 },
-                        shadowOpacity: 0.06,
-                        shadowRadius: 4,
-                        height: 90,
-                    },
-                    headerTitleAlign: "center",
-
-                    // ✅ Swap sides if screen is hidden
-                    headerLeft: () =>
-                        isHidden ? (
-                            <DrawerToggleButton tintColor={colors.text} />
-                        ) : null,
-
-                    headerRight: () =>
-                        isHidden ? (
-                            <TouchableOpacity
-                                style={{ marginRight: 12 }}
-                                onPress={() => router.back()}
-                            >
-                                <Ionicons
-                                    name="arrow-back"
-                                    size={24}
-                                    color={colors.text}
-                                />
-                            </TouchableOpacity>
-                        ) : null,
-                };
+                // ✅ Swap sides if screen is hidden
+                headerLeft: () => <DrawerToggleButton tintColor={colors.text} />,
+                headerRight: () => (
+                    <TouchableOpacity
+                        style={{ marginRight: 12 }}
+                        onPress={() => router.back()}
+                    >
+                        <Ionicons name="arrow-back" size={24} color={colors.text} />
+                    </TouchableOpacity>
+                ),
             }}
         >
-
             {/* Tabs group (The primary route which usually doesn't show the back button) */}
             <Drawer.Screen
                 name="tabs"
                 options={{
-                    drawerItemStyle: { display: 'none' },
+                    drawerItemStyle: { display: "none" },
                     title: undefined,
                     headerShown: false,
                 }}
@@ -115,7 +88,6 @@ export default function AppLayout() {
                 }}
             />
 
-
             <Drawer.Screen
                 name="news"
                 options={{
@@ -133,7 +105,11 @@ export default function AppLayout() {
                     drawerLabel: "المجتمع",
                     title: "المجتمع",
                     drawerIcon: () => (
-                        <Ionicons name="chatbubble-ellipses-outline" size={22} color="#1C384B" />
+                        <Ionicons
+                            name="chatbubble-ellipses-outline"
+                            size={22}
+                            color="#1C384B"
+                        />
                     ),
                 }}
             />
@@ -185,7 +161,7 @@ export default function AppLayout() {
             <Drawer.Screen
                 name="profile"
                 options={{
-                    drawerItemStyle: { display: 'none' },
+                    drawerItemStyle: { display: "none" },
                     title: "البروفايل",
                     headerShown: true,
                 }}
@@ -196,7 +172,7 @@ export default function AppLayout() {
             <Drawer.Screen
                 name="news/[newsId]"
                 options={{
-                    drawerLabelStyle: { display: 'none' },
+                    drawerLabelStyle: { display: "none" },
                     title: "اﻻخبار",
                     headerShown: true,
                 }}
@@ -205,17 +181,16 @@ export default function AppLayout() {
             <Drawer.Screen
                 name="post/[postId]"
                 options={{
-                    drawerLabelStyle: { display: 'none' },
+                    drawerLabelStyle: { display: "none" },
                     title: "اﻻخبار",
                     headerShown: true,
                 }}
             />
 
-
             <Drawer.Screen
                 name="property/[propertyId]"
                 options={{
-                    drawerLabelStyle: { display: 'none' },
+                    drawerLabelStyle: { display: "none" },
                     title: "العقارات",
                     headerShown: true,
                 }}
@@ -224,7 +199,7 @@ export default function AppLayout() {
             <Drawer.Screen
                 name="category/[categoryName]"
                 options={{
-                    drawerLabelStyle: { display: 'none' },
+                    drawerLabelStyle: { display: "none" },
                     title: "الخدمات",
                     headerShown: true,
                 }}
@@ -233,7 +208,7 @@ export default function AppLayout() {
             <Drawer.Screen
                 name="category/service/[serviceId]"
                 options={{
-                    drawerLabelStyle: { display: 'none' },
+                    drawerLabelStyle: { display: "none" },
                     title: "الخدمات",
                     headerShown: true,
                 }}
@@ -242,7 +217,7 @@ export default function AppLayout() {
             <Drawer.Screen
                 name="category/sub-category/[subCategoryName]"
                 options={{
-                    drawerLabelStyle: { display: 'none' },
+                    drawerLabelStyle: { display: "none" },
                     title: "الخدمات",
                     headerShown: true,
                 }}
@@ -284,7 +259,7 @@ export default function AppLayout() {
             <Drawer.Screen
                 name="notification"
                 options={{
-                    drawerItemStyle: { display: 'none' },
+                    drawerItemStyle: { display: "none" },
                     title: undefined,
                     headerShown: true,
                 }}

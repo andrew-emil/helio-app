@@ -236,8 +236,9 @@ export default function App() {
             textAlign: 'center',
             width: "100%",
           }}
+
         >
-          هليوبوليس الجديدة بين يديك
+          هليوبوليس الجديدة
         </GradientText>
         <Text style={{
           color: colors.text,
@@ -245,7 +246,7 @@ export default function App() {
         }}
           className="text-center mt-1 text-lg flex-shrink"
         >
-          دليلك الشامل للخدمات والأخبار والمجتمع.
+          دليلك الشامل للخدمات والأخبار.
         </Text>
       </Animated.View>
 

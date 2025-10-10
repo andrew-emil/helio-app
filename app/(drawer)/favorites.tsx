@@ -20,21 +20,21 @@ export default function Favourites() {
     const { colors } = useTheme();
     const { loading } = useFavorites()
 
-    const { data: favorites, error, isLoading } = useQuery<ServiceDocData[]>({
+    const { data: favorites, error, isLoading } = useQuery<ServiceDocData[] | undefined>({
         queryKey: ['favs'],
         queryFn: async () => {
             const favs = await FavStorage.getFavorites()
             return favs
-        }
+        },
+        enabled: !!isLoggedIn && !isGuest,
+        staleTime: 1000 * 60 * 2
     })
 
-    if (isGuest || !isLoggedIn)
-        return <Redirect href="/(auth)/login" />
-
-    if (isLoading || loading || !favorites) return <Spinner />
-
+    if (isGuest || !isLoggedIn) return <Redirect href="/(auth)/login" />
+    if (isLoading || loading) return <Spinner />
     if (error) return <ErrorFallback />
 
+    const favArray = favorites ?? []
 
     return (
         <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}
@@ -46,9 +46,9 @@ export default function Favourites() {
                     icon={<Ionicons name="heart" size={48} color={colors.error} />}
                 />
                 <View className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                    {favorites.length > 0 ? (
+                    {favArray.length > 0 ? (
                         <View className="flex-1 flex-col justify-center items-center gap-6">
-                            {favorites.map(service => (
+                            {favArray.map(service => (
                                 <ServiceCard key={service.id} service={service} />
                             ))}
                         </View>
