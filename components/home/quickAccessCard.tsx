@@ -13,10 +13,11 @@ type QuickAccessCardProps = {
 const QuickAccessCard: React.FC<QuickAccessCardProps> = ({ icon, title, to }) => {
     const router = useRouter();
     const { colors, themeMode } = useTheme()
+    console.log(to)
 
     return (
         <Pressable
-            onPress={() => router.push(to as any)}
+            onPress={() => router.push(`${to}` as any)}
             className="flex flex-col items-center justify-center p-4 rounded-xl shadow-lg text-center w-40"
             style={{
                 backgroundColor: colors.surface

@@ -5,11 +5,21 @@ import { useTheme } from "@/context/themeContext";
 import { useUser } from "@/context/userContext";
 import useFontsLoader from "@/hooks/useFontLoader";
 import { useSplashData } from "@/hooks/useSplashData";
+import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useRef, useState } from "react";
 import { Animated, Easing, Image, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 SplashScreen.preventAutoHideAsync();
 
@@ -20,6 +30,8 @@ export default function App() {
   const { colors } = useTheme();
   const { data, isSuccess, isLoading, isError } = useSplashData();
   const { saveInitialData } = useData();
+
+
 
   // Your existing animation refs
   const logoPosition = useRef(new Animated.Value(300)).current;

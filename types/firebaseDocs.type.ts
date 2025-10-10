@@ -11,7 +11,9 @@ export interface NotificatioDocData {
     id: string;
     title: string;
     body: string;
-    imageUrl: string;
+    imageUrl?: string;
+    data?: Record<string, string>;
+    read?: boolean;
     createdAt: Date;
 }
 

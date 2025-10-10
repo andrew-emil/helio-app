@@ -10,72 +10,79 @@ import { TouchableOpacity } from "react-native";
 
 export default function AppLayout() {
     const { colors, themeMode } = useTheme();
-    const router = useRouter()
+    const router = useRouter();
+
+    // Screens hidden from drawer (display: none)
+    const hiddenScreens = [
+        "tabs",
+        "profile",
+        "news/[newsId]",
+        "post/[postId]",
+        "property/[propertyId]",
+        "category/[categoryName]",
+        "category/service/[serviceId]",
+        "category/sub-category/[subCategoryName]",
+        "notification"
+    ];
 
     return (
         <Drawer
             drawerContent={(props) => <CustomDrawerContent {...props} />}
-            screenOptions={({ route }) => ({
-                // CRITICAL CHANGE 1: Set the drawer to slide in from the right for RTL
-                drawerPosition: 'right',
+            screenOptions={({ route, navigation }) => {
+                const isHidden = hiddenScreens.includes(route.name);
 
-                drawerStyle: {
-                    backgroundColor: colors.headerColor,
-                },
-                drawerLabelStyle: {
-                    color: colors.text,
-                    fontFamily: FONTS_CONSTANTS.medium
-                },
-                drawerActiveTintColor: themeMode === "light" ? "#1d4ed8" : "#3b82f6",
-                drawerInactiveTintColor: colors.text,
+                return {
+                    drawerPosition: "right",
+                    drawerStyle: { backgroundColor: colors.headerColor },
+                    drawerLabelStyle: {
+                        color: colors.text,
+                        fontFamily: FONTS_CONSTANTS.medium,
+                    },
+                    drawerActiveTintColor: themeMode === "light" ? "#1d4ed8" : "#3b82f6",
+                    drawerInactiveTintColor: colors.text,
+                    headerTitleStyle: {
+                        fontSize: 20,
+                        fontFamily: FONTS_CONSTANTS.bold,
+                        color: colors.text,
+                        letterSpacing: 0.3,
+                    },
+                    headerTitleContainerStyle: { left: 0, right: 0 },
+                    headerStyle: {
+                        backgroundColor: colors.headerColor,
+                        borderBottomColor: colors.surface,
+                        borderBottomWidth: 1,
+                        elevation: 0,
+                        shadowColor: colors.primary,
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: 0.06,
+                        shadowRadius: 4,
+                        height: 90,
+                    },
+                    headerTitleAlign: "center",
 
-                headerTitleStyle: {
-                    fontSize: 20,
-                    fontFamily: FONTS_CONSTANTS.bold,
-                    color: colors.text,
-                    letterSpacing: 0.3,
-                },
-                headerTitleContainerStyle: { left: 0, right: 0 },
-                headerStyle: {
-                    backgroundColor: colors.headerColor,
-                    borderBottomColor: colors.surface,
-                    borderBottomWidth: 1,
+                    // ✅ Swap sides if screen is hidden
+                    headerLeft: () =>
+                        isHidden ? (
+                            <DrawerToggleButton tintColor={colors.text} />
+                        ) : null,
 
-                    elevation: 0,
-
-                    shadowColor: colors.primary,
-                    shadowOffset: { width: 0, height: 1 },
-                    shadowOpacity: 0.06,
-                    shadowRadius: 4,
-                    height: 90,
-                },
-                headerTitleAlign: "center",
-
-                // CRITICAL CHANGE 2: Swap headerLeft and headerRight for RTL consistency
-
-                // The back button is typically on the left in RTL headers
-                headerLeft: ({ canGoBack }) => {
-                    // Global back button logic: use canGoBack for standard navigation
-                    if (canGoBack && route.name !== 'tabs') {
-                        return (
+                    headerRight: () =>
+                        isHidden ? (
                             <TouchableOpacity
-                                className="flex ml-3" // Use margin-left for spacing on the left
+                                style={{ marginRight: 12 }}
                                 onPress={() => router.back()}
                             >
-                                <Ionicons name='arrow-back' size={24} color={colors.text} />
+                                <Ionicons
+                                    name="arrow-back"
+                                    size={24}
+                                    color={colors.text}
+                                />
                             </TouchableOpacity>
-                        );
-                    }
-                    return null;
-                },
-
-                // The drawer toggle button is typically on the right in RTL headers
-                // The toggle button automatically opens the drawer from the 'right' side
-                headerRight: () => <DrawerToggleButton tintColor={colors.text} />,
-
-                // The original global headerRight (back button) has been moved to headerLeft
-            })}
+                        ) : null,
+                };
+            }}
         >
+
             {/* Tabs group (The primary route which usually doesn't show the back button) */}
             <Drawer.Screen
                 name="tabs"
@@ -192,15 +199,18 @@ export default function AppLayout() {
                     drawerLabelStyle: { display: 'none' },
                     title: "اﻻخبار",
                     headerShown: true,
-                    headerRight: undefined, // Clear the headerRight (drawer toggle) for detail pages
-                    headerLeft: () => <TouchableOpacity // Custom back path on the left
-                        className="flex ml-3"
-                        onPress={() => router.push('/(drawer)/news')}
-                    >
-                        <Ionicons name='arrow-back' size={24} color={colors.text} />
-                    </TouchableOpacity>
                 }}
             />
+
+            <Drawer.Screen
+                name="post/[postId]"
+                options={{
+                    drawerLabelStyle: { display: 'none' },
+                    title: "اﻻخبار",
+                    headerShown: true,
+                }}
+            />
+
 
             <Drawer.Screen
                 name="property/[propertyId]"
@@ -208,13 +218,6 @@ export default function AppLayout() {
                     drawerLabelStyle: { display: 'none' },
                     title: "العقارات",
                     headerShown: true,
-                    headerRight: undefined, // Clear the headerRight (drawer toggle) for detail pages
-                    headerLeft: () => <TouchableOpacity // Custom back path on the left
-                        className="flex ml-3"
-                        onPress={() => router.push('/(drawer)/tabs/realState')}
-                    >
-                        <Ionicons name='arrow-back' size={24} color={colors.text} />
-                    </TouchableOpacity>
                 }}
             />
 
@@ -224,13 +227,6 @@ export default function AppLayout() {
                     drawerLabelStyle: { display: 'none' },
                     title: "الخدمات",
                     headerShown: true,
-                    headerRight: undefined, // Clear the headerRight (drawer toggle) for detail pages
-                    headerLeft: () => <TouchableOpacity // Custom back path on the left
-                        className="flex ml-3"
-                        onPress={() => router.push('/(drawer)/tabs/services')}
-                    >
-                        <Ionicons name='arrow-back' size={24} color={colors.text} />
-                    </TouchableOpacity>
                 }}
             />
 
@@ -240,13 +236,15 @@ export default function AppLayout() {
                     drawerLabelStyle: { display: 'none' },
                     title: "الخدمات",
                     headerShown: true,
-                    headerRight: undefined, // Clear the headerRight (drawer toggle) for detail pages
-                    headerLeft: () => <TouchableOpacity // Standard router.back() on the left
-                        className="flex ml-3"
-                        onPress={() => router.back()}
-                    >
-                        <Ionicons name='arrow-back' size={24} color={colors.text} />
-                    </TouchableOpacity>
+                }}
+            />
+
+            <Drawer.Screen
+                name="category/sub-category/[subCategoryName]"
+                options={{
+                    drawerLabelStyle: { display: 'none' },
+                    title: "الخدمات",
+                    headerShown: true,
                 }}
             />
 
@@ -291,7 +289,6 @@ export default function AppLayout() {
                     headerShown: true,
                 }}
             />
-
         </Drawer>
     );
 }

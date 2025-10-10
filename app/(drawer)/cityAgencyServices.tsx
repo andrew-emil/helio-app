@@ -4,61 +4,12 @@ import Spinner from "@/components/spinner";
 import { FONTS_CONSTANTS } from "@/constants/fontsConstants";
 import { useTheme } from "@/context/themeContext";
 import { getAllCityAgency } from "@/services/firebase/cityAgency";
-import { CityAgencyDoc } from "@/types/firebaseDocs.type";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const mockServiceGuides: CityAgencyDoc[] = [
-    {
-        id: "1",
-        title: "التقديم على عداد مياه",
-        stepsToApply: [
-            "تقديم طلب بالمركز التجاري لجهاز المدينة.",
-            "سداد رسوم المعاينة والتوريد.",
-            "إجراء المعاينة الفنية بواسطة الفني المختص.",
-            "استلام العداد وتركيبه بعد استيفاء الشروط.",
-        ],
-        requiredDocs: [
-            "صورة بطاقة الرقم القومي سارية.",
-            "صورة عقد الملكية أو التخصيص.",
-            "آخر إيصال سداد رسوم الصيانة.",
-            "توكيل رسمي في حالة عدم حضور المالك.",
-        ],
-    },
-    {
-        id: "2",
-        title: "التقديم على عداد كهرباء",
-        stepsToApply: [
-            "شراء كراسة الشروط من شركة الكهرباء.",
-            "تقديم المستندات المطلوبة ودفع الرسوم.",
-            "تحديد موعد للمعاينة الفنية.",
-            "تركيب العداد بعد الموافقة.",
-        ],
-        requiredDocs: [
-            "صورة بطاقة الرقم القومي.",
-            "موافقة من جهاز المدينة.",
-            "صورة رخصة البناء.",
-        ],
-    },
-    {
-        id: '3',
-        title: "استخراج تصريح تشطيب",
-        stepsToApply: [
-            "تقديم طلب لإدارة التنمية بالجهاز.",
-            "تحديد نوع التشطيبات (داخلية/خارجية).",
-            "سداد تأمين أعمال قابل للاسترداد.",
-            "الحصول على التصريح والبدء في الأعمال.",
-        ],
-        requiredDocs: [
-            "صورة بطاقة المالك.",
-            "صورة محضر استلام الوحدة.",
-            "مخطط تفصيلي بالأعمال المطلوبة.",
-        ],
-    }
-];
 
 export default function CityAgencyServices() {
     const { colors } = useTheme();
@@ -96,7 +47,7 @@ export default function CityAgencyServices() {
                     icon={<Feather name="file-text" size={48} color="#06b6d4" />}
                 />
 
-                {mockServiceGuides.map((guide) => (
+                {cityAgencies.map((guide) => (
                     <View
                         key={guide.id}
                         className="my-4 rounded-xl overflow-hidden border"

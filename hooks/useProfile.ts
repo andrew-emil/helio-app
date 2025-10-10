@@ -1,7 +1,7 @@
 import { useUser } from '@/context/userContext';
 import { getUserProfile, saveUserProfile } from '@/services/firebase/user';
-import { UserProfileData } from '@/types/user.type';
 import { ProfileHookReturn } from '@/types/profile.types';
+import { UserProfileData } from '@/types/user.type';
 import { errorHandler } from '@/utils/errorHandler';
 import { useEffect, useState } from 'react';
 
@@ -13,10 +13,10 @@ export const useProfile = (): ProfileHookReturn => {
 
   const loadProfileData = async () => {
     if (!user?.uid) return;
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
       const data = await getUserProfile(user.uid);
       setProfileData(data);
@@ -38,18 +38,18 @@ export const useProfile = (): ProfileHookReturn => {
 
     try {
       await saveUserProfile(user.uid, data);
-      
+
       // Update user context
       setUser({
         ...user,
         username: data.username || user.username,
         email: data.email || user.email,
-        imageUrl: data.imageUrl || user.imageUrl,
+        imageUrl: data.imageUrl !== undefined ? data.imageUrl : user.imageUrl,
       });
 
       // Update local state
       setProfileData(prev => prev ? { ...prev, ...data } : data);
-      
+
     } catch (err) {
       const appError = errorHandler.handleError(err, 'updateProfile');
       setError(appError.message);

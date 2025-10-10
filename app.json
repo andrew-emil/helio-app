@@ -19,9 +19,7 @@
         "NSPhotoLibraryUsageDescription": "We need library access to let you choose photos.",
         "NSLocationWhenInUseUsageDescription": "We need location to show nearby items.",
         "UIBackgroundModes": ["remote-notification"]
-      },
-      "supportsRtl": true,
-      "forceRtl": true
+      }
     },
     "android": {
       "permissions": [
@@ -37,9 +35,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.andrewemil.helioapp",
-      "softwareRtl": true,
-      "forceRtl": true
+      "package": "com.andrewemil.helioapp"
     },
     "splash": {
       "image": "./assets/images/icon2.png",
@@ -62,17 +58,11 @@
     "plugins": [
       "@react-native-firebase/app",
       "@react-native-firebase/auth",
+      "expo-notifications",
       [
         "expo-router",
         {
           "sitemap": true
-        }
-      ],
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/images/icon.jpg",
-          "color": "#ffffff"
         }
       ],
       [

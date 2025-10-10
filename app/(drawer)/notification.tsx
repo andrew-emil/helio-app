@@ -3,6 +3,7 @@ import ErrorFallback from "@/components/errorFallback";
 import PageBanner from "@/components/pageBanner";
 import Spinner from "@/components/spinner";
 import { FONTS_CONSTANTS } from "@/constants/fontsConstants";
+import { useNotification } from "@/context/notificationsContext";
 import { useTheme } from "@/context/themeContext";
 import { useBg } from "@/hooks/useBg";
 import { getAllNotifications } from "@/services/firebase/notification";
@@ -10,28 +11,41 @@ import { NotificatioDocData } from "@/types/firebaseDocs.type";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { Timestamp } from "firebase/firestore";
-import React from "react";
-import { ScrollView, Text, View } from "react-native";
+import React, { useEffect } from "react";
+import { RefreshControl, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function NotificationWrapper() {
     const { colors } = useTheme()
     const { bg } = useBg()
+    const { notification: latestNotification } = useNotification()
 
-    const { data: notifications, isLoading, error } = useQuery<NotificatioDocData[]>({
+    const { data: notifications, isLoading, error, refetch, isRefetching } = useQuery<NotificatioDocData[]>({
         queryKey: ["notifications"],
         queryFn: getAllNotifications,
-    }
-    );
+        refetchOnWindowFocus: true,
+    });
+
+    // Log the latest push notification when it arrives
+    useEffect(() => {
+        if (latestNotification) {
+            console.log("🔔 Latest push notification in notification page:", latestNotification);
+            // Optionally refetch notifications when a new push notification arrives
+            refetch();
+        }
+    }, [latestNotification, refetch]);
+
     if (isLoading || !notifications) return <Spinner />;
     if (error) return <ErrorFallback />;
 
-    const sortedNotifications = notifications.map((n) => ({
-        ...n,
-        createdAt: n.createdAt instanceof Timestamp
-            ? n.createdAt.toDate()
-            : new Date(n.createdAt),
-    }));
+    const sortedNotifications = notifications
+        .map((n) => ({
+            ...n,
+            createdAt: n.createdAt instanceof Timestamp
+                ? n.createdAt.toDate()
+                : new Date(n.createdAt),
+        }))
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()); // Sort by newest first
 
     return (
         <SafeAreaView className="animate-fade-in flex-1 w-full"
@@ -42,6 +56,14 @@ export default function NotificationWrapper() {
                     padding: 16,
                     alignItems: "stretch",
                 }}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={isRefetching}
+                        onRefresh={refetch}
+                        colors={[colors.primary]}
+                        tintColor={colors.primary}
+                    />
+                }
             >
                 <PageBanner
                     title="الإشعارات"
@@ -54,26 +76,36 @@ export default function NotificationWrapper() {
                         <View className="space-y-4"
                         >
                             {sortedNotifications.map((n, index) => {
+                                const isUnread = !n.read;
                                 return (
-                                    <View
-                                        key={index}
-                                        className="p-4 rounded-lg shadow-sm flex flex-row items-start gap-4"
-                                        style={{ backgroundColor: colors.surface }}
+                                    <TouchableOpacity
+                                        key={n.id || index}
+                                        className="p-4 rounded-lg shadow-sm flex flex-row items-start gap-4 mb-3"
+                                        style={{
+                                            backgroundColor: colors.surface,
+                                            borderLeftWidth: isUnread ? 4 : 0,
+                                            borderLeftColor: isUnread ? colors.primary : 'transparent'
+                                        }}
+                                        activeOpacity={0.7}
                                     >
                                         {/* Status dot */}
                                         <View className="flex-shrink-0 mt-1">
                                             <View
-                                                className={`w-3 h-3 rounded-full bg-cyan-500`}
+                                                className={`w-3 h-3 rounded-full ${isUnread ? 'bg-cyan-500' : 'bg-gray-400'}`}
                                             />
                                         </View>
 
                                         {/* Content */}
-                                        <View>
+                                        <View className="flex-1">
                                             <Text
-                                                style={{ fontFamily: FONTS_CONSTANTS.bold, color: colors.text }}>
+                                                style={{
+                                                    fontFamily: FONTS_CONSTANTS.bold,
+                                                    color: colors.text,
+                                                    fontWeight: isUnread ? 'bold' : 'normal'
+                                                }}>
                                                 {n.title}
                                             </Text>
-                                            <Text className={` ${bg("text-gray-600", "text-gray-300")}`}
+                                            <Text className={`mt-1 ${bg("text-gray-600", "text-gray-300")}`}
                                                 style={{ fontFamily: FONTS_CONSTANTS.regular }}>
                                                 {n.body}
                                             </Text>
@@ -82,7 +114,24 @@ export default function NotificationWrapper() {
                                                 {new Date(n.createdAt).toLocaleDateString("ar-EG-u-nu-latn")}
                                             </Text>
                                         </View>
-                                    </View>
+
+                                        {/* Action button for unread notifications */}
+                                        {isUnread && (
+                                            <TouchableOpacity
+                                                className="px-3 py-1 rounded-full"
+                                                style={{ backgroundColor: colors.primary }}
+                                                activeOpacity={0.7}
+                                            >
+                                                <Text style={{
+                                                    color: 'white',
+                                                    fontFamily: FONTS_CONSTANTS.medium,
+                                                    fontSize: 12
+                                                }}>
+                                                    جديد
+                                                </Text>
+                                            </TouchableOpacity>
+                                        )}
+                                    </TouchableOpacity>
                                 );
                             })}
                         </View>

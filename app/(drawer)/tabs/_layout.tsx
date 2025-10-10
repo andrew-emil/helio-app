@@ -1,4 +1,5 @@
 import CustomHeaderTitle from "@/components/CustomHeaderTitle";
+import NotificationBadge from "@/components/notification/NotificationBadge";
 import ThemeToggleButton from "@/components/themeToggleButton";
 import { FONTS_CONSTANTS } from "@/constants/fontsConstants";
 import { useTheme } from "@/context/themeContext";
@@ -6,7 +7,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { DrawerToggleButton } from "@react-navigation/drawer";
 import { Tabs, useRouter } from "expo-router";
-import { TouchableOpacity, View } from "react-native";
+import { View } from "react-native";
 
 export default function TabsLayout() {
     const { colors, themeMode } = useTheme();
@@ -20,13 +21,11 @@ export default function TabsLayout() {
                 headerLeft: () => <DrawerToggleButton tintColor={colors.text} />,
                 headerRight: () => (
                     <View className='flex flex-row items-center'>
-                        <TouchableOpacity
-                            onPress={() => router.push('/notification')}
-                            className='ml-2.5 p-2 rounded-lg'
-                            accessibilityLabel="Notifications"
-                        >
-                            <Ionicons name="notifications-outline" size={22} color={colors.text} />
-                        </TouchableOpacity>
+                        <NotificationBadge
+                            onPress={() => router.push('/(drawer)/notification')}
+                            size="small"
+                            showCount={true}
+                        />
                         <ThemeToggleButton />
                     </View>
                 ),

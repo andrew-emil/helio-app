@@ -104,7 +104,10 @@ export default function Service() {
 
                     {isLoggedIn && (
                         <TouchableOpacity
-                            onPress={() => toggle(service)}
+                            onPress={async () => {
+                                await toggle(service)
+                                myFavorites.push(service)
+                            }}
                             className="p-2 rounded-full"
                             style={{ marginLeft: 12 }}
                         >
@@ -306,9 +309,7 @@ export default function Service() {
                         </TouchableOpacity>
                     </View>
                 )}
-                <Toast config={{
-                    
-                }}/>
+                <Toast />
             </ScrollView>
         </SafeAreaView >
     )

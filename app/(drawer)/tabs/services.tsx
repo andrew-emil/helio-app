@@ -163,7 +163,7 @@ export default function Services() {
                                                         }}
                                                         className="flex-1 min-w-[48%] p-3 rounded-lg active:opacity-70"
                                                         onPress={() => {
-                                                            router.push(`/(drawer)/category/${subCategory.subCategoryName}`)
+                                                            router.push(`/(drawer)/category/sub-category/${subCategory.subCategoryName}`)
                                                         }}
                                                     >
                                                         <Text

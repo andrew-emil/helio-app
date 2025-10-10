@@ -23,7 +23,7 @@ export const BusesExternal = () => {
             <FlatList
                 scrollEnabled={false}
                 data={buses}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item, index) => `${item.id}-${index}`}
                 ListEmptyComponent={() => (
                     <View className="w-full p-4"
                         style={{ backgroundColor: colors.surface }}

@@ -42,7 +42,3 @@ app-example
 # generated native folders
 /ios
 /android
-
-google-services.json
-GoogleService-Info.plist
-helio-89b78-firebase-adminsdk-fbsvc-38cf413644.json

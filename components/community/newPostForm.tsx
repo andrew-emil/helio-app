@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { PlusIcon, TrashIcon } from "./icons";
 import { useTheme } from "@/context/themeContext";
+import CustomInputForm from "../customInputForm";
 
 type Props = {
     onClose: () => void;
@@ -81,7 +82,7 @@ export default function NewPostForm({ onClose, onCreate }: Props) {
             <Text style={[styles.label, { color: colors.text, marginTop: 12 }]}>
                 {category === "استطلاع رأي" ? "السؤال الرئيسي للاستطلاع" : "العنوان (اختياري)"}
             </Text>
-            <TextInput
+            <CustomInputForm
                 value={title}
                 onChangeText={setTitle}
                 placeholder={category === "استطلاع رأي" ? "ما هو سؤالك؟" : "مثال: تجمع ملاك الحي الأول"}
@@ -89,7 +90,7 @@ export default function NewPostForm({ onClose, onCreate }: Props) {
             />
 
             <Text style={[styles.label, { color: colors.text, marginTop: 12 }]}>المحتوى</Text>
-            <TextInput
+            <CustomInputForm
                 value={content}
                 onChangeText={setContent}
                 placeholder="اكتب ما يدور في ذهنك..."
@@ -100,7 +101,7 @@ export default function NewPostForm({ onClose, onCreate }: Props) {
             {category === "نقاش خاص" && (
                 <>
                     <Text style={[styles.label, { color: colors.text, marginTop: 12 }]}>الجمهور المستهدف</Text>
-                    <TextInput
+                    <CustomInputForm
                         value={targetAudience}
                         onChangeText={setTargetAudience}
                         placeholder="مثال: سكان الحي الأول"

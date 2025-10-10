@@ -13,9 +13,9 @@ export default function CustomInputForm(props: TextInputProps) {
             padding: 12,
             marginVertical: 6,
             borderWidth: 1,
-            borderColor: colors.background,
+            borderColor: colors.border,
             textAlign: "right",
         }}
-        placeholderTextColor={colors.text}
+        placeholderTextColor={colors.muted}
     />;
 }

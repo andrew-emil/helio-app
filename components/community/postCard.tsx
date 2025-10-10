@@ -1,7 +1,8 @@
+import { useTheme } from "@/context/themeContext";
 import { PostDocData } from "@/types/firebaseDocs.type";
+import { useRouter } from "expo-router";
 import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useTheme } from "@/context/themeContext";
 import { ChatIcon, LikeIcon, PinIcon } from "./icons";
 import PollInCard from "./pollInCard";
 
@@ -17,6 +18,7 @@ export default function PostCard({
     onToggleLike,
 }: Props) {
     const { colors } = useTheme();
+    const router = useRouter()
     const isLiked = currentUserId ? post.likes.includes(currentUserId) : false;
 
     // ✅ Safely format Firestore Timestamp or JS Date
@@ -31,7 +33,9 @@ export default function PostCard({
     return (
         <TouchableOpacity
             onPress={() => {
-                // TODO: connect to post details page
+                if (post.id) {
+                    router.push(`/(drawer)/post/${post.id}` as any)
+                }
             }}
             style={[
                 styles.card,
@@ -105,6 +109,9 @@ export default function PostCard({
                             borderColor: colors.border,
                         },
                     ]}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${isLiked ? "إلغاء الإعجاب" : "إعجاب"} بالمنشور`}
+                    accessibilityHint="اضغط للتفاعل مع المنشور"
                 >
                     <LikeIcon color={isLiked ? colors.accent : colors.iconColor} />
                     <Text

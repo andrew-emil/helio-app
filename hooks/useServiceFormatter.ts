@@ -9,7 +9,7 @@ export interface FormattedService {
     createdAt: Date;
     description: string;
     externalLink?: string;
-    imageUrl: string;
+    imageUrl: string[];
     name: string;
     phone: string;
     secondPhone?: string;

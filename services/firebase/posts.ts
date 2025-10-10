@@ -3,15 +3,20 @@ import { PostDocData } from "@/types/firebaseDocs.type";
 import { dbRefs } from "@/utils/firebaseUtils";
 import {
     addDoc,
+    arrayRemove,
+    arrayUnion,
     collection,
     doc,
     getDoc,
     getDocs,
+    limit,
     orderBy,
     query,
     serverTimestamp,
+    startAfter,
     Timestamp,
-    updateDoc
+    updateDoc,
+    where
 } from "firebase/firestore";
 import { db } from "./firebase";
 
@@ -197,4 +202,188 @@ export async function voteInPoll(postId: string, optionIndex: number, userId: st
     });
 
     await updateDoc(postRef, { pollOptions: updatedPollOptions });
+}
+
+/**
+ * Toggle like status for a post
+ * @param postId - The ID of the post
+ * @param userId - The ID of the user liking/unliking
+ */
+export async function toggleLikePost(postId: string, userId: string): Promise<void> {
+    try {
+        const postRef = doc(db, FIREBASE_DOCS.POSTS, postId);
+        const snapshot = await getDoc(postRef);
+
+        if (!snapshot.exists()) {
+            throw new Error("Post not found");
+        }
+
+        const post = snapshot.data();
+        const likes = post.likes || [];
+
+        if (likes.includes(userId)) {
+            // Remove like
+            await updateDoc(postRef, {
+                likes: arrayRemove(userId)
+            });
+        } else {
+            // Add like
+            await updateDoc(postRef, {
+                likes: arrayUnion(userId)
+            });
+        }
+    } catch (error) {
+        console.error("Error toggling like:", error);
+        throw error;
+    }
+}
+
+/**
+ * Add a comment to a post
+ * @param postId - The ID of the post
+ * @param comment - Comment data
+ * @param userId - The ID of the user commenting
+ * @param username - The username of the user commenting
+ * @param avatar - The avatar URL of the user commenting
+ */
+export async function addCommentToPost(
+    postId: string,
+    comment: { content: string },
+    userId: string,
+    username: string,
+    avatar: string
+): Promise<void> {
+    try {
+        const postRef = doc(db, FIREBASE_DOCS.POSTS, postId);
+        const snapshot = await getDoc(postRef);
+
+        if (!snapshot.exists()) {
+            throw new Error("Post not found");
+        }
+
+        const newComment = {
+            id: `${Date.now()}_${userId}`, // Simple ID generation
+            userId,
+            username,
+            avatar,
+            content: comment.content,
+            createdAt: serverTimestamp()
+        };
+
+        await updateDoc(postRef, {
+            comments: arrayUnion(newComment)
+        });
+    } catch (error) {
+        console.error("Error adding comment:", error);
+        throw error;
+    }
+}
+
+/**
+ * Delete a comment from a post (admin or comment author only)
+ * @param postId - The ID of the post
+ * @param commentId - The ID of the comment to delete
+ */
+export async function deleteComment(postId: string, commentId: string): Promise<void> {
+    try {
+        const postRef = doc(db, FIREBASE_DOCS.POSTS, postId);
+        const snapshot = await getDoc(postRef);
+
+        if (!snapshot.exists()) {
+            throw new Error("Post not found");
+        }
+
+        const post = snapshot.data();
+        const comments = post.comments || [];
+        const commentToDelete = comments.find((c: any) => c.id === commentId);
+
+        if (!commentToDelete) {
+            throw new Error("Comment not found");
+        }
+
+        await updateDoc(postRef, {
+            comments: arrayRemove(commentToDelete)
+        });
+    } catch (error) {
+        console.error("Error deleting comment:", error);
+        throw error;
+    }
+}
+
+/**
+ * Pin or unpin a post (admin only)
+ * @param postId - The ID of the post
+ * @param isPinned - Whether to pin or unpin the post
+ */
+export async function togglePinPost(postId: string, isPinned: boolean): Promise<void> {
+    try {
+        const postRef = doc(db, FIREBASE_DOCS.POSTS, postId);
+        await updateDoc(postRef, { isPinned });
+    } catch (error) {
+        console.error("Error toggling pin status:", error);
+        throw error;
+    }
+}
+
+/**
+ * Delete a post (admin or post author only)
+ * @param postId - The ID of the post to delete
+ */
+export async function deletePost(postId: string): Promise<void> {
+    try {
+        const postRef = doc(db, FIREBASE_DOCS.POSTS, postId);
+        await updateDoc(postRef, {
+            deleted: true,
+            deletedAt: serverTimestamp()
+        });
+    } catch (error) {
+        console.error("Error deleting post:", error);
+        throw error;
+    }
+}
+
+/**
+ * Get posts by category with pagination
+ * @param category - The category to filter by
+ * @param limit - Number of posts to fetch
+ * @param lastDoc - Last document for pagination
+ */
+export async function getPostsByCategory(
+    category: string,
+    limitCount: number = 10,
+    lastDoc?: any
+): Promise<PostDocData[]> {
+    try {
+        let q = query(
+            postsColRef,
+            orderBy("createdAt", "desc")
+        );
+
+        if (category !== "all") {
+            q = query(q, where("category", "==", category));
+        }
+
+        if (lastDoc) {
+            q = query(q, startAfter(lastDoc));
+        }
+
+        q = query(q, limit(limitCount));
+
+        const snapshot = await getDocs(q);
+
+        return snapshot.docs.map((docSnap) => {
+            const data = docSnap.data();
+            return {
+                id: docSnap.id,
+                ...data,
+                createdAt: toDateIfTimestamp(data.createdAt) ?? new Date(0),
+                likes: data.likes || [],
+                comments: data.comments || [],
+                pollOptions: data.pollOptions || [],
+            } as PostDocData;
+        });
+    } catch (error) {
+        console.error("Error fetching posts by category:", error);
+        throw error;
+    }
 }

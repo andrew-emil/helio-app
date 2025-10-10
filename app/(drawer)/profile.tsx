@@ -7,14 +7,15 @@ import UserReviews from "@/components/profile/userReview";
 import Spinner from "@/components/spinner";
 import { useTheme } from "@/context/themeContext";
 import { useUser } from "@/context/userContext";
-import { useImagePicker } from "@/hooks/useImagePicker";
 import { useProfile } from "@/hooks/useProfile";
 import { useUserAccount } from "@/hooks/useUserAccount";
 import { RatingsStorage } from "@/services/storage/ratingsStorage";
+import { supabase } from "@/services/supabseClient";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
-import { Alert, ScrollView, StyleSheet } from "react-native";
+import { ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 
 export default function Profile() {
     const { colors } = useTheme();
@@ -23,7 +24,6 @@ export default function Profile() {
     // Custom hooks
     const { loading: profileLoading, updateProfile } = useProfile();
     const { isDeleting, confirmDeleteAccount } = useUserAccount();
-    const { pickedImageUri, uploadImageToServer, clearPickedImage } = useImagePicker();
 
     // Local state
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -58,9 +58,40 @@ export default function Profile() {
         setIsEditModalOpen(true);
     }, [user]);
 
+    const uploadImageToServer = useCallback(async (localUri: string): Promise<string> => {
+        const fileExt = localUri.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+        const filePath = `public/${fileName}`;
+
+        const formData = new FormData();
+        formData.append('file', {
+            uri: localUri,
+            name: fileName,
+            type: `image/${fileExt}`,
+        } as any);
+
+        const { error } = await supabase.storage
+            .from('helio-images')
+            .upload(filePath, formData, {
+                contentType: `image/${fileExt}`,
+            });
+
+        if (error) throw error;
+
+        const { data: { publicUrl } } = supabase.storage
+            .from('helio-images')
+            .getPublicUrl(filePath);
+
+        return publicUrl;
+    }, []);
+
     const handleSaveProfile = useCallback(async (data: { name: string; email: string; imageUrl?: string }) => {
         if (!data.name.trim() || !data.email.trim()) {
-            Alert.alert("خطأ", "يرجى ملء الحقول");
+            Toast.show({
+                type: "error",
+                text1: "خطأ",
+                text2: "يرجى ملء الحقول",
+            });
             return;
         }
 
@@ -68,8 +99,8 @@ export default function Profile() {
         try {
             let uploadedUrl: string | null = null;
 
-            if (pickedImageUri) {
-                uploadedUrl = await uploadImageToServer(pickedImageUri);
+            if (data.imageUrl) {
+                uploadedUrl = await uploadImageToServer(data.imageUrl);
             }
 
             await updateProfile({
@@ -79,24 +110,35 @@ export default function Profile() {
             });
 
             setIsEditModalOpen(false);
-            clearPickedImage();
-            Alert.alert("تم الحفظ", "تم تحديث الملف الشخصي بنجاح");
+            Toast.show({
+                type: "success",
+                text1: "تم الحفظ",
+                text2: "تم تحديث الملف الشخصي بنجاح",
+            });
         } catch (err: any) {
             console.error("Failed to save profile", err);
-            Alert.alert("خطأ", err?.message ?? "فشل تحديث الملف الشخصي");
+            Toast.show({
+                type: "error",
+                text1: "خطأ",
+                text2: err?.message ?? "فشل تحديث الملف الشخصي",
+            });
         } finally {
             setIsSaving(false);
         }
-    }, [pickedImageUri, uploadImageToServer, updateProfile, clearPickedImage]);
+    }, [updateProfile, uploadImageToServer]);
 
     const handleDeleteAccount = useCallback(async () => {
         try {
             await confirmDeleteAccount();
-                            setIsDeleteModalOpen(false);
-                        } catch (err: any) {
-                            console.error("Failed to delete account", err);
+            setIsDeleteModalOpen(false);
+        } catch (err: any) {
+            console.error("Failed to delete account", err);
             if (err.message !== 'Cancelled') {
-                            Alert.alert("خطأ", err?.message ?? "فشل حذف الحساب");
+                Toast.show({
+                    type: "error",
+                    text1: "خطأ",
+                    text2: err?.message ?? "فشل حذف الحساب",
+                });
             }
         }
     }, [confirmDeleteAccount]);
@@ -107,7 +149,7 @@ export default function Profile() {
     return (
         <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
             <ScrollView style={styles.scroll} contentContainerStyle={[styles.content]}>
-                <ProfileHeader user={user} previewAvatarUri={pickedImageUri} />
+                <ProfileHeader user={user} />
 
                 <AccountSettings
                     onEditProfile={handleEditProfile}
@@ -133,6 +175,9 @@ export default function Profile() {
                 onConfirm={handleDeleteAccount}
                 isDeleting={isDeleting}
             />
+
+            {/* Toast container */}
+            <Toast />
         </SafeAreaView>
     );
 }
