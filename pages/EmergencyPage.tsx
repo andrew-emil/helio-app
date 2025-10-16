@@ -9,30 +9,31 @@ import Modal from '../components/common/Modal';
 
 const EmergencyCard: React.FC<{ contact: EmergencyContact; onEdit: (contact: EmergencyContact) => void; onDelete: (id: number) => void; }> = ({ contact, onEdit, onDelete }) => {
     const canManage = useHasPermission(['مسؤول ادارة الخدمات']);
-    
+
     return (
-    <div className="group relative bg-white dark:bg-slate-800 rounded-xl p-6 text-center shadow-lg border border-transparent dark:border-slate-700 transform hover:-translate-y-1 transition-transform duration-300 ease-in-out">
-        {canManage && (
-            <div className="absolute top-2 left-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button onClick={() => onEdit(contact)} className="p-2 bg-slate-100 dark:bg-slate-700 rounded-full text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/50" title="تعديل الرقم">
-                    <PencilSquareIcon className="w-4 h-4" />
-                </button>
-                <button onClick={() => onDelete(contact.id)} className="p-2 bg-slate-100 dark:bg-slate-700 rounded-full text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50" title="حذف الرقم">
-                    <TrashIcon className="w-4 h-4" />
-                </button>
+        <div className="group relative bg-white dark:bg-slate-800 rounded-xl p-6 text-center shadow-lg border border-transparent dark:border-slate-700 transform hover:-translate-y-1 transition-transform duration-300 ease-in-out">
+            {canManage && (
+                <div className="absolute top-2 left-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onClick={() => onEdit(contact)} className="p-2 bg-slate-100 dark:bg-slate-700 rounded-full text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/50" title="تعديل الرقم">
+                        <PencilSquareIcon className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => onDelete(contact.id)} className="p-2 bg-slate-100 dark:bg-slate-700 rounded-full text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50" title="حذف الرقم">
+                        <TrashIcon className="w-4 h-4" />
+                    </button>
+                </div>
+            )}
+
+            <div className="mb-2">
+                <PhoneIcon className="w-10 h-10 text-cyan-400 mx-auto" />
             </div>
-        )}
-        
-        <div className="mb-2">
-            <PhoneIcon className="w-10 h-10 text-cyan-400 mx-auto"/>
+            <h3 className="text-base font-bold mb-2 h-12 flex items-center justify-center text-gray-800 dark:text-white">{contact.title}</h3>
+            <p className="text-2xl font-mono tracking-widest text-gray-700 dark:text-gray-300">{contact.number}</p>
+            <a href={`tel:${contact.number}`} className="mt-4 inline-block w-full bg-green-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-600 transition-colors">
+                اتصال مباشر
+            </a>
         </div>
-        <h3 className="text-base font-bold mb-2 h-12 flex items-center justify-center text-gray-800 dark:text-white">{contact.title}</h3>
-        <p className="text-2xl font-mono tracking-widest text-gray-700 dark:text-gray-300">{contact.number}</p>
-        <a href={`tel:${contact.number}`} className="mt-4 inline-block w-full bg-green-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-600 transition-colors">
-            اتصال مباشر
-        </a>
-    </div>
-)};
+    )
+};
 
 
 const EmergencyForm: React.FC<{
@@ -112,7 +113,7 @@ const EmergencyPage: React.FC = () => {
     };
 
     const confirmDelete = (id: number) => {
-        if(window.confirm('هل أنت متأكد من حذف هذا الرقم؟')) {
+        if (window.confirm('هل أنت متأكد من حذف هذا الرقم؟')) {
             handleDeleteEmergencyContact(id);
             showToast('تم حذف الرقم بنجاح');
         }
@@ -120,7 +121,7 @@ const EmergencyPage: React.FC = () => {
 
     return (
         <div className="min-h-full animate-fade-in">
-             <button onClick={() => navigate(-1)} className="flex items-center space-x-2 rtl:space-x-reverse text-cyan-500 dark:text-cyan-400 hover:underline mb-6">
+            <button onClick={() => navigate(-1)} className="flex items-center space-x-2 rtl:space-x-reverse text-cyan-500 dark:text-cyan-400 hover:underline mb-6">
                 <ArrowLeftIcon className="w-5 h-5" />
                 <span>العودة إلى لوحة التحكم</span>
             </button>
@@ -163,13 +164,13 @@ const EmergencyPage: React.FC = () => {
                     </div>
                 </div>
             </div>
-            
-            <Modal 
+
+            <Modal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 title={editingContact ? 'تعديل الرقم' : 'إضافة رقم جديد'}
             >
-                <EmergencyForm 
+                <EmergencyForm
                     onSave={handleSaveAndClose}
                     onClose={() => setIsModalOpen(false)}
                     contact={editingContact}

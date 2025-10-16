@@ -1,28 +1,25 @@
-import React, { useMemo } from 'react';
-import type { Activity } from '../types';
+import React from 'react';
 import { WrenchScrewdriverIcon, ShieldExclamationIcon, NewspaperIcon, BuildingOffice2Icon } from './Icons';
-import { useServicesContext } from '../context/ServicesContext';
-import { useAppContext } from '../context/AppContext';
-import { usePropertiesContext } from '../context/PropertiesContext';
-import { useContentContext } from '../context/ContentContext';
+import { useRecentActivity } from '../hooks/useRecentActivity';
+import { RecentActivity } from '../services/firebase/dashboard';
+import Spinner from './Spinner';
 
-const formatRelativeTime = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+const formatRelativeTime = (date: Date) => {
+  const now = new Date();
+  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-    if (seconds < 60) return `قبل ${Math.round(seconds)} ثانية`;
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `قبل ${minutes} دقيقة`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `قبل ${hours} ساعة`;
-    const days = Math.floor(hours / 24);
-    return `قبل ${days} يوم`;
+  if (seconds < 60) return `قبل ${Math.round(seconds)} ثانية`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `قبل ${minutes} دقيقة`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `قبل ${hours} ساعة`;
+  const days = Math.floor(hours / 24);
+  return `قبل ${days} يوم`;
 };
 
-const ActivityIcon: React.FC<{ type: Activity['type'] }> = ({ type }) => {
+const ActivityIcon: React.FC<{ type: RecentActivity['type'] }> = ({ type }) => {
   const iconClasses = "w-6 h-6";
-  const typeMap: { [key in Activity['type']]: React.ReactNode } = {
+  const typeMap: { [key in RecentActivity['type']]: React.ReactNode } = {
     NEW_SERVICE: <WrenchScrewdriverIcon className={`${iconClasses} text-blue-500`} />,
     EMERGENCY_REPORT: <ShieldExclamationIcon className={`${iconClasses} text-red-500`} />,
     NEWS_PUBLISHED: <NewspaperIcon className={`${iconClasses} text-purple-500`} />,
@@ -32,42 +29,45 @@ const ActivityIcon: React.FC<{ type: Activity['type'] }> = ({ type }) => {
 };
 
 const RecentActivityTable: React.FC = () => {
-    const { news } = useContentContext();
-    const { services } = useServicesContext();
-    const { properties } = usePropertiesContext();
-    
-    const recentActivities = useMemo(() => {
-        const serviceActivities: Activity[] = services.map(s => ({
-            id: `s-${s.id}`,
-            type: 'NEW_SERVICE',
-            description: `تمت إضافة خدمة جديدة: ${s.name}`,
-            time: s.creationDate,
-        }));
-        
-        const propertyActivities: Activity[] = properties.map(p => ({
-            id: `p-${p.id}`,
-            type: 'NEW_PROPERTY',
-            description: `تمت إضافة عقار جديد: ${p.title}`,
-            time: p.creationDate,
-        }));
+  const { activities, loading, error } = useRecentActivity();
 
-        const newsActivities: Activity[] = news.map(n => ({
-            id: `n-${n.id}`,
-            type: 'NEWS_PUBLISHED',
-            description: `تم نشر خبر جديد: ${n.title}`,
-            time: n.date,
-        }));
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Spinner />
+      </div>
+    );
+  }
 
-        return [...serviceActivities, ...propertyActivities, ...newsActivities]
-            .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
-            .slice(0, 5);
-    }, [services, properties, news]);
+  // Show error state
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <div className="text-red-600 dark:text-red-400 text-sm">
+          خطأ في تحميل الأنشطة الحديثة
+        </div>
+      </div>
+    );
+  }
+
+  // Show empty state
+  if (activities.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <div className="text-gray-500 dark:text-gray-400 text-sm">
+          لا توجد أنشطة حديثة
+        </div>
+      </div>
+    );
+  }
+  console.log(activities)
 
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
         <tbody>
-          {recentActivities.map((activity) => (
+          {activities.map((activity) => (
             <tr key={activity.id} className="bg-white dark:bg-slate-800 border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700">
               <td className="px-4 py-4">
                 <div className="flex items-center space-x-3 rtl:space-x-reverse">
@@ -75,7 +75,7 @@ const RecentActivityTable: React.FC = () => {
                   <div>
                     <div className="font-medium text-gray-800 dark:text-gray-200">{activity.description}</div>
                     <div className="text-xs text-gray-500 dark:text-gray-400">
-                        {formatRelativeTime(activity.time)}
+                      {formatRelativeTime(activity.time)}
                     </div>
                   </div>
                 </div>

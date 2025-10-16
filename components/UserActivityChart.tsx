@@ -1,17 +1,46 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-
-const data = [
-  { name: 'يناير', "مستخدمين جدد": 150, "إجمالي المستخدمين": 150 },
-  { name: 'فبراير', "مستخدمين جدد": 120, "إجمالي المستخدمين": 270 },
-  { name: 'مارس', "مستخدمين جدد": 200, "إجمالي المستخدمين": 470 },
-  { name: 'أبريل', "مستخدمين جدد": 110, "إجمالي المستخدمين": 580 },
-  { name: 'مايو', "مستخدمين جدد": 90, "إجمالي المستخدمين": 670 },
-  { name: 'يونيو', "مستخدمين جدد": 100, "إجمالي المستخدمين": 770 },
-  { name: 'يوليو', "مستخدمين جدد": 80, "إجمالي المستخدمين": 850 },
-];
+import { useUserActivityData } from '../hooks/useUserActivityData';
+import Spinner from './Spinner';
 
 const UserActivityChart: React.FC = () => {
+  const { data, loading, error } = useUserActivityData();
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center" style={{ width: '100%', height: 300 }}>
+        <Spinner />
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="flex items-center justify-center" style={{ width: '100%', height: 300 }}>
+        <div className="text-center">
+          <div className="text-red-600 dark:text-red-400 text-sm">
+            خطأ في تحميل بيانات المستخدمين
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show empty state
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex items-center justify-center" style={{ width: '100%', height: 300 }}>
+        <div className="text-center">
+          <div className="text-gray-500 dark:text-gray-400 text-sm">
+            لا توجد بيانات متاحة
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ width: '100%', height: 300 }}>
       <ResponsiveContainer>
@@ -22,13 +51,13 @@ const UserActivityChart: React.FC = () => {
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(128, 128, 128, 0.1)" />
           <XAxis dataKey="name" stroke="#9ca3af" />
           <YAxis stroke="#9ca3af" />
-          <Tooltip 
-            contentStyle={{ 
-                backgroundColor: 'rgba(15, 23, 42, 0.9)', 
-                borderColor: '#334155',
-                borderRadius: '0.5rem',
-                color: '#fff'
-            }} 
+          <Tooltip
+            contentStyle={{
+              backgroundColor: 'rgba(15, 23, 42, 0.9)',
+              borderColor: '#334155',
+              borderRadius: '0.5rem',
+              color: '#fff'
+            }}
           />
           <Legend />
           <Line type="monotone" dataKey="إجمالي المستخدمين" stroke="#22d3ee" strokeWidth={2} activeDot={{ r: 8 }} />

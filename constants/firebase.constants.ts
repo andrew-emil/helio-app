@@ -1,0 +1,18 @@
+export const FIREBASE_DOCS = {
+    USERS: "users",
+    SERVICES: "Services",
+    ADVERTISMENTS: "advertisements",
+    BUSES_EXTERNAL: "buses_external",
+    BUSES_INTERNAL: "buses_internal",
+    NOTIFICATIONS: "notifications",
+    NEWS: "news",
+    FRIDAY_BUSES: "friday_buses",
+    PROPERTIES: "properties",
+    RATINGS: "ratings",
+    EMERGENCIES: "emergencies",
+    MARKET: "market",
+    JOBS: "jobs",
+    CITY_AGENCY: "city_agency",
+    POSTS: 'posts',
+    MISSING_ITEMS: "missing_items",
+}

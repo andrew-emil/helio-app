@@ -18,9 +18,7 @@ const LoginPage: React.FC = () => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        
         const admin = admins.find(a => a.email === email);
-        
         // For demo purposes, we'll use a static password.
         if (admin && password === 'password123') {
             login(admin);
